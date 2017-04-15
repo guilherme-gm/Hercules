@@ -550,6 +550,9 @@ struct Battle_Config {
 
 	int max_summoner_parameter; // Summoner Max Stats
 	int mvp_exp_reward_message;
+
+	int feature_rodex;
+	int feature_rodex_use_accountmail;
 };
 
 /* criteria for battle_config.idletime_critera */
