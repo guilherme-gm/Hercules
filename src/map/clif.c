@@ -19778,6 +19778,9 @@ static void clif_parse_SearchStoreInfo(int fd, struct map_session_data *sd)
 
 	cardlist = RFIFOP(fd, sizeof(struct PACKET_CZ_SEARCH_STORE_INFO) + blocksize * item_count);
 
+	if (item_count < 1)
+		return; // Should never happen
+
 	items_list = aMalloc(sizeof(uint32) * item_count);
 	cards_list = aMalloc(sizeof(uint32) * card_count);
 	for (i = 0; i < item_count; i ++) {

@@ -136,7 +136,8 @@ static void searchstore_query(struct map_session_data *sd,
 	}
 
 	nullpo_retv(itemlist);
-	nullpo_retv(cardlist);
+	if (card_count > 0)
+		nullpo_retv(cardlist);
 
 	// validate lists
 	for( i = 0; i < item_count; i++ ) {
