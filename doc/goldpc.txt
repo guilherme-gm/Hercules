@@ -1,0 +1,4 @@
+- GoldPC packets were added/changed between 2014-04-30 and 2014-05-08
+- GoldPC was announced in a "pre-launch" mode on 2014-06-11 : https://ro.gnjoy.com/news/notice/View.asp?BBSMode=10001&seq=6419&curpage=39
+- GoldPC was officially released in 2014-06-18 : https://ro.gnjoy.com/news/notice/View.asp?BBSMode=10001&seq=6422&curpage=39
+

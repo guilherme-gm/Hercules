@@ -34,6 +34,7 @@
 #include "map/date.h" // is_day_of_*()
 #include "map/duel.h"
 #include "map/elemental.h"
+#include "map/goldpc.h"
 #include "map/guild.h" // guild-"search(), guild_request_info()
 #include "map/homunculus.h"
 #include "map/instance.h"
@@ -9923,6 +9924,17 @@ static int pc_setregistry(struct map_session_data *sd, int64 reg, int val)
 			} else if( !strcmp(regname,"#KAFRAPOINTS") && sd->kafraPoints != val ) {
 				val = cap_value(val, 0, MAX_ZENY);
 				sd->kafraPoints = val;
+			} else if (strcmp(regname, GOLDPC_POINTS_VAR) == 0 && sd->goldpc_info.points != val) {
+				bool is_full = (sd->goldpc_info.points == GOLDPC_MAX_POINTS);
+				val = cap_value(val, 0, GOLDPC_MAX_POINTS);
+				sd->goldpc_info.points = val;
+				
+				if (sd->goldpc_info.loaded) {
+					if (is_full)
+						goldpc->start(sd);
+					else
+						clif->goldpc_info(sd);
+				}
 			}
 			break;
 	}

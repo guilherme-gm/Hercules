@@ -5818,6 +5818,18 @@ DEFINE_PACKET_HEADER(ZC_SPECIALPOPUP, 0x0bbe);
 #endif  // PACKETVER_MAIN_NUM >= 20221005
 
 #if PACKETVER >= 20140430
+struct PACKET_ZC_GOLDPC_INFO {
+	// @TODO: Find what is the 1 byte less in 20140430
+	uint16 PacketType;
+	int8 active;
+	int8 mode;
+	int32 point;
+	int32 playedtime;
+} __attribute__((packed));
+DEFINE_PACKET_HEADER(ZC_GOLDPC_INFO , 0x0a15);
+#endif // PACKETVER >= 20140430
+
+#if PACKETVER >= 20140430
 struct PACKET_CZ_DYNAMICNPC_CREATE_REQUEST {
 	uint16 PacketType;
 	char name[NAME_LENGTH];

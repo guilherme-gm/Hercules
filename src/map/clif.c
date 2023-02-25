@@ -32,6 +32,7 @@
 #include "map/clan.h"
 #include "map/elemental.h"
 #include "map/enchantui.h"
+#include "map/goldpc.h"
 #include "map/grader.h"
 #include "map/guild.h"
 #include "map/homunculus.h"
@@ -11378,6 +11379,8 @@ static void clif_parse_LoadEndAck(int fd, struct map_session_data *sd)
 		if (battle_config.feature_enable_attendance_system != 0 && battle_config.show_attendance_window != 0 && clif->attendance_timediff(sd) == true)
 			clif->open_ui_send(sd, ZC_ATTENDANCE_UI);
 #endif
+
+		goldpc->load(sd);
 
 		// Run OnPCLoginEvent labels.
 		npc->script_event(sd, NPCE_LOGIN);
@@ -25737,6 +25740,34 @@ static void clif_dynamicnpc_create_result(struct map_session_data *sd, enum dyna
 #endif // 20140430
 }
 
+static void clif_goldpc_info(struct map_session_data *sd)
+{
+#if PACKETVER >= 20140611
+	nullpo_retv(sd);
+
+	const int fd = sd->fd;
+	WFIFOHEAD(fd, sizeof(struct PACKET_ZC_GOLDPC_INFO));
+	
+	struct PACKET_ZC_GOLDPC_INFO *p = WFIFOP(fd, 0);
+	memset(p, 0x0, sizeof(struct PACKET_ZC_GOLDPC_INFO));
+
+	p->PacketType = HEADER_ZC_GOLDPC_INFO;
+	p->point = sd->goldpc_info.points;
+
+	if (sd->goldpc_info.mode != NULL) {
+		p->active = 1;
+		p->mode = sd->goldpc_info.mode->id;
+		
+		// The client considers GOLDPC_MAX_TIME = 0 seconds remaining,
+		// so we have to add an offset to cover the ignored time.
+		int time_offset = GOLDPC_MAX_TIME - sd->goldpc_info.mode->required_time;
+		p->playedtime = (sd->goldpc_info.play_time + time_offset);
+	}
+	
+	WFIFOSET(fd, sizeof(struct PACKET_ZC_GOLDPC_INFO));
+#endif // 20140611
+}
+
 /*==========================================
  * Main client packet processing function
  *------------------------------------------*/
@@ -27084,4 +27115,6 @@ void clif_defaults(void)
 
 	clif->pDynamicnpcCreateRequest = clif_parse_dynamicnpc_create_request;
 	clif->dynamicnpc_create_result = clif_dynamicnpc_create_result;
+
+	clif->goldpc_info = clif_goldpc_info;
 }
