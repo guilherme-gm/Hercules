@@ -401,7 +401,7 @@ function	script	Time2Str	{
 //== Function F_ShuffleNumbers =============================
 // Generate a set of numbers in random order that the numbers are not repeated
 //    callfunc "F_ShuffleNumbers",<start num>,<last num>,<output array>{,<count>};
-// Examples: 
+// Examples:
 //    callfunc("F_ShuffleNumbers", 0, 5, .@output)      // possible output 4,1,3,2,0,5
 //    callfunc("F_ShuffleNumbers", -5, 1, .@output)     // possible output -3,-5,-4,-2,-1,1,0
 //    callfunc("F_ShuffleNumbers", 0, 100, .@output, 5) // possible output 9,55,27,84,33
@@ -482,3 +482,30 @@ function	script	F_MesItemInfo	{
 	else
 		return .@itemname$;
 }
+
+//== Function F_NaviMob ==========================================
+// Writes a clickable text that shows Navi window for a monster
+// @param 0 mobId        monster ID (may be the numeric constant)
+// @param 1 displayName  clickable link display name (optional)
+//
+// Examples:
+//     // Shows: "Target: [Poring]"
+//     // where "[Poring]" is clickable and brings Navi for Poring monster
+//     mesf("Target: %s", F_NaviMob(PORING));
+//
+//    // Shows: "Target: [Hunt This Guy]"
+//    // where "[Hunt This Guy]" is clickable and brings Navi for Poring monster
+//     mesf("Target: %s", F_NaviMob(PORING, "Hunt This Guy"))
+function	script	F_NaviMob	{
+	.@name$ = getarg(1, getmonsterinfo(getarg(0), MOB_NAME));
+
+	if (PACKETVER < 20160000) // @TODO: Find correct date
+		return .@name$;
+
+	return sprintf(
+		"<NAVI>[%s]<INFO>%s,0,0,3,-222,1</INFO></NAVI>",
+		.@name$,
+		getmonsterinfo(getarg(0), MOB_SPRITE)
+	);
+}
+
