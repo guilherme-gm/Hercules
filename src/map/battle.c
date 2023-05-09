@@ -5647,7 +5647,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				&& skill_id != NPC_GRANDDARKNESS
 				&& skill_id != PA_SHIELDCHAIN
 				&& skill_id != KO_HAPPOKUNAI
-#ifndef RENEWAL			
+#ifndef RENEWAL
 				&& !flag.cri
 #endif
 			) {
@@ -7506,7 +7506,6 @@ static const struct config_data_old battle_data[] = {
 	{ "max_walk_speed",                     &battle_config.max_walk_speed,                  300,    100,    100*DEFAULT_WALK_SPEED, },
 	{ "max_lv",                             &battle_config.max_lv,                          99,     0,      MAX_LEVEL,      },
 	{ "aura_lv",                            &battle_config.aura_lv,                         99,     0,      INT_MAX,        },
-	{ "max_hp",                             &battle_config.max_hp,                          1000000, 100,   21474836,       },
 	{ "max_sp",                             &battle_config.max_sp,                          1000000, 100,   21474836,       },
 	{ "max_cart_weight",                    &battle_config.max_cart_weight,                 8000,   100,    1000000,        },
 	{ "max_parameter",                      &battle_config.max_parameter,                   99,     10,     10000,          },
