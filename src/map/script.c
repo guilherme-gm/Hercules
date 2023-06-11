@@ -11841,10 +11841,12 @@ static BUILDIN(itemskill)
 	int flag = script_hasdata(st, 4) ? script_getnum(st, 4) : ISF_NONE;
 
 	sd->auto_cast_current.itemskill_check_conditions = ((flag & ISF_CHECKCONDITIONS) == ISF_CHECKCONDITIONS);
-
+	
+	bool cast_on_self = ((flag & ISF_CASTONSELF) == ISF_CASTONSELF);
+	struct block_list *target = cast_on_self ? &sd->bl : NULL;
 	if (sd->auto_cast_current.itemskill_check_conditions) {
 		if (skill->check_condition_castbegin(sd, sd->auto_cast_current.skill_id, sd->auto_cast_current.skill_lv) == 0
-		    || skill->check_condition_castend(sd, sd->auto_cast_current.skill_id, sd->auto_cast_current.skill_lv) == 0) {
+		    || skill->check_condition_castend(sd, sd->auto_cast_current.skill_id, sd->auto_cast_current.skill_lv, target) == 0) {
 			pc->autocast_clear_current(sd);
 			return true;
 		}
@@ -11853,7 +11855,7 @@ static BUILDIN(itemskill)
 	}
 
 	sd->auto_cast_current.itemskill_instant_cast = ((flag & ISF_INSTANTCAST) == ISF_INSTANTCAST);
-	sd->auto_cast_current.itemskill_cast_on_self = ((flag & ISF_CASTONSELF) == ISF_CASTONSELF);
+	sd->auto_cast_current.itemskill_cast_on_self = cast_on_self;
 
 	VECTOR_ENSURE(sd->auto_cast, 1, 1);
 	VECTOR_PUSH(sd->auto_cast, sd->auto_cast_current);
