@@ -15281,7 +15281,10 @@ static int skill_check_condition_required_equip(struct map_session_data *sd, int
 	}
 
 	if (any_equip_flag && !any_equip_found) {
-		clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_EQUIPMENT, fail_amount, fail_id);
+		if (skill_id == RL_P_ALTER)
+			clif->skill_fail(sd, skill_id, USESKILL_FAIL_MSG, MSG_FAIL_NEED_EQUIPPED_PROPERTY_SAINT_BULLET, 0);
+		else
+			clif->skill_fail(sd, skill_id, USESKILL_FAIL_NEED_EQUIPMENT, fail_amount, fail_id);
 		return 1;
 	}
 
