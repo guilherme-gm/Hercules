@@ -7343,7 +7343,6 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SG_MOON_COMFORT:
 		case SG_STAR_COMFORT:
 		case NPC_HALLUCINATION:
-		case GS_MADNESSCANCEL:
 		case GS_ADJUSTMENT:
 		case GS_INCREASING:
 		case NJ_KASUMIKIRI:
@@ -7402,6 +7401,17 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case SU_STOOP:
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
+			break;
+		case GS_MADNESSCANCEL:
+#ifdef RENEWAL			
+			if (sd != NULL && sd->sc.data[SC_GS_MADNESSCANCEL] != NULL) { // "turn off" (Renewal-only)
+				clif->skill_nodamage(src, bl, skill_id, skill_lv,
+					status_change_end(bl, SC_GS_MADNESSCANCEL, INVALID_TIMER));
+				break;
+			}
+#endif
+			clif->skill_nodamage(src, bl, skill_id, skill_lv,
+				sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id,skill_lv), skill_id));
 			break;
 		case KN_AUTOCOUNTER:
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
