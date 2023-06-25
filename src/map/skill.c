@@ -7320,7 +7320,9 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case CR_REFLECTSHIELD:
 		case MS_REFLECTSHIELD:
 		case AS_POISONREACT:
+#ifndef RENEWAL
 		case MC_LOUD:
+#endif
 		case MG_ENERGYCOAT:
 		case MO_EXPLOSIONSPIRITS:
 		case MO_STEELBODY:
@@ -7875,6 +7877,9 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		}
 			break;
 
+#ifdef RENEWAL
+		case MC_LOUD:
+#endif
 		case AL_ANGELUS:
 		case PR_MAGNIFICAT:
 		case PR_GLORIA:
