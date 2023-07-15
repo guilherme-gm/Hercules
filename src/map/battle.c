@@ -1621,12 +1621,29 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 	bst = status->get_base_status(src);
 	tst = status->get_status_data(target);
 
+	// it always comes here with 100, there is a mess of changes that deducts or inclueds it....
+	// usually, removing the 100 makes the formula match the ones in the description, so it makes cleaner in the db
+	if (skill->get_skillratio(skill_id, skill_lv) != SKILLRATIO_CUSTOM) {
+		skillratio += -100 + skill->get_skillratio(skill_id, skill_lv);
+		if (!skill->has_additional_effect(skill_id)) {
+			int dmgmod = skill->get_dmgmod(skill_id);;
+			if (dmgmod > 0)
+				RE_LVL_DMOD(dmgmod);
+
+			if (skillratio < 1)
+				return 0;
+
+			return skillratio;
+		}
+	}
+
+	// additional effect / custom formmula
 	switch(attack_type){
 		case BF_MAGIC:
 			switch(skill_id){
-				case MG_NAPALMBEAT:
-					skillratio += skill_lv * 10 - 30;
-					break;
+			// 	case MG_NAPALMBEAT:
+			// 		skillratio += skill_lv * 10 - 30;
+			// 		break;
 				case MG_FIREBALL:
 			#ifdef RENEWAL
 					skillratio += 20 * skill_lv;
@@ -1635,12 +1652,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 			#endif
 					break;
 				case MG_SOULSTRIKE:
+					// just have to apply the additional effect
 					if (battle->check_undead(tst->race,tst->def_ele))
 						skillratio += 5*skill_lv;
 					break;
-				case MG_FIREWALL:
-					skillratio -= 50;
-					break;
+				// case MG_FIREWALL:
+				// 	skillratio -= 50;
+				// 	break;
 				case MG_THUNDERSTORM:
 					/**
 					 * in Renewal Thunder Storm boost is 100% (in pre-re, 80%)
@@ -1799,13 +1817,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					* Warlock
 					**/
 				case WL_SOULEXPANSION: // MATK [{( Skill Level + 4 ) x 100 ) + ( Caster's INT )} x ( Caster's Base Level / 100 )] %
-					skillratio = 100 * (skill_lv + 4) + st->int_;
-					RE_LVL_DMOD(100);
+					skillratio += st->int_;
+					// maybe some check to ensure it is != 0 so people can remove it
+					RE_LVL_DMOD(skill->get_dmgmod(skill_id));
 					break;
-				case WL_FROSTMISTY: // MATK [{( Skill Level x 100 ) + 200 } x ( Caster's Base Level / 100 )] %
-					skillratio += 100 + 100 * skill_lv;
-					RE_LVL_DMOD(100);
-					break;
+				// case WL_FROSTMISTY: // MATK [{( Skill Level x 100 ) + 200 } x ( Caster's Base Level / 100 )] %
+				// 	skillratio += 100 + 100 * skill_lv;
+				// 	RE_LVL_DMOD(100);
+				// 	break;
 				case WL_JACKFROST:
 					if( tsc && tsc->data[SC_FROSTMISTY] ){
 						skillratio += 900 + 300 * skill_lv;
@@ -1820,6 +1839,7 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					RE_LVL_DMOD(100);
 					break;
 				case WL_CRIMSONROCK:
+				// this won't work :( unless we had yet another key in the db for 1300
 					skillratio = 300 * skill_lv;
 					RE_LVL_DMOD(100);
 					skillratio += 1300;

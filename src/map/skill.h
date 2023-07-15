@@ -1844,6 +1844,8 @@ struct s_skill_db {
 #ifdef RENEWAL_CAST
 	int fixed_cast[MAX_SKILL_LEVEL];
 #endif
+	int skillratio[MAX_SKILL_LEVEL];
+	int level_dmg_mod;
 	int upkeep_time[MAX_SKILL_LEVEL],upkeep_time2[MAX_SKILL_LEVEL],cooldown[MAX_SKILL_LEVEL];
 	int castcancel[MAX_SKILL_LEVEL];
 	int cast_def_rate[MAX_SKILL_LEVEL];
