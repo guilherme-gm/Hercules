@@ -1640,6 +1640,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (battle->check_undead(tst->race,tst->def_ele))
 						skillratio += 5*skill_lv;
 					break;
+#ifdef RENEWAL
+				case WZ_EARTHSPIKE:
+					skillratio += 100;
+					break;
+#endif
 				case MG_FIREWALL:
 					skillratio -= 50;
 					break;
