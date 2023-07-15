@@ -13082,7 +13082,9 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 
 	nullpo_retr(NULL, src);
 
-	limit = skill->get_time(skill_id,skill_lv);
+	// Every skill that uses unitsetting today implicitly will use SkillData1 as duration
+	// now it is clear that htis is the duration of the unit
+	limit = skill->get_unit_duration(skill_id,skill_lv);
 	range = skill->get_unit_range(skill_id,skill_lv);
 	interval = skill->get_unit_interval(skill_id, skill_lv);
 	target = skill->get_unit_target(skill_id, skill_lv);
