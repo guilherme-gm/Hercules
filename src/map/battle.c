@@ -1659,46 +1659,46 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				// case MG_FIREWALL:
 				// 	skillratio -= 50;
 				// 	break;
-				case MG_THUNDERSTORM:
-					/**
-					 * in Renewal Thunder Storm boost is 100% (in pre-re, 80%)
-					 **/
-					#ifndef RENEWAL
-						skillratio -= 20;
-					#endif
-					break;
-				case MG_FROSTDIVER:
-					skillratio += 10 * skill_lv;
-					break;
+				// case MG_THUNDERSTORM:
+				// 	/**
+				// 	 * in Renewal Thunder Storm boost is 100% (in pre-re, 80%)
+				// 	 **/
+				// 	#ifndef RENEWAL
+				// 		skillratio -= 20;
+				// 	#endif
+				// 	break;
+				// case MG_FROSTDIVER:
+				// 	skillratio += 10 * skill_lv;
+				// 	break;
 				case AL_HOLYLIGHT:
-					skillratio += 25;
+					// skillratio += 25;
 					if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
 						skillratio *= 5; //Does 5x damage include bonuses from other skills?
 					break;
-				case AL_RUWACH:
-					skillratio += 45;
-					break;
-				case WZ_FROSTNOVA:
-					skillratio += (100+skill_lv*10) * 2 / 3 - 100;
-					break;
-				case WZ_FIREPILLAR:
-					if (skill_lv > 10)
-						skillratio += 2300; //200% MATK each hit
-					else
-						skillratio += -60 + 20*skill_lv; //20% MATK each hit
-					break;
-				case WZ_SIGHTRASHER:
-					skillratio += 20 * skill_lv;
-					break;
-				case WZ_WATERBALL:
-					skillratio += 30 * skill_lv;
-					break;
-				case WZ_STORMGUST:
-					skillratio += 40 * skill_lv;
-					break;
-				case HW_NAPALMVULCAN:
-					skillratio += 10 * skill_lv - 30;
-					break;
+				// case AL_RUWACH:
+				// 	skillratio += 45;
+				// 	break;
+				// case WZ_FROSTNOVA:
+				// 	skillratio += (100+skill_lv*10) * 2 / 3 - 100;
+				// 	break;
+				// case WZ_FIREPILLAR:
+				// 	if (skill_lv > 10)
+				// 		skillratio += 2300; //200% MATK each hit
+				// 	else
+				// 		skillratio += -60 + 20*skill_lv; //20% MATK each hit
+				// 	break;
+				// case WZ_SIGHTRASHER:
+				// 	skillratio += 20 * skill_lv;
+				// 	break;
+				// case WZ_WATERBALL:
+				// 	skillratio += 30 * skill_lv;
+				// 	break;
+				// case WZ_STORMGUST:
+				// 	skillratio += 40 * skill_lv;
+				// 	break;
+				// case HW_NAPALMVULCAN:
+				// 	skillratio += 10 * skill_lv - 30;
+				// 	break;
 				case SL_STIN:
 					skillratio += (tst->size!=SZ_SMALL?-99:10*skill_lv); //target size must be small (0) for full damage.
 					break;
@@ -1709,23 +1709,23 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += -60 + status->get_lv(src); //Base damage is 40% + lv%
 					break;
 				case NJ_KOUENKA:
-					skillratio -= 10;
+					// skillratio -= 10;
 					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
 						skillratio += 20 * sd->charm_count;
 					break;
 				case NJ_KAENSIN:
-					skillratio -= 50;
+					// skillratio -= 50;
 					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
 						skillratio += 10 * sd->charm_count;
 					break;
 				case NJ_BAKUENRYU:
-					skillratio += 50 * (skill_lv - 1);
+					// skillratio += 50 * (skill_lv - 1);
 					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
 						skillratio += 15 * sd->charm_count;
 					break;
 #ifdef RENEWAL
 				case NJ_HYOUSENSOU:
-					skillratio -= 30;
+					// skillratio -= 30;
 					if (sc != NULL && sc->data[SC_NJ_SUITON] != NULL)
 						skillratio += 2 * skill_lv;
 					if (sd && sd->charm_type == CHARM_TYPE_WATER && sd->charm_count > 0)
@@ -1733,12 +1733,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 #endif
 				case NJ_HYOUSYOURAKU:
-					skillratio += 50 * skill_lv;
+					// skillratio += 50 * skill_lv;
 					if (sd && sd->charm_type == CHARM_TYPE_WATER && sd->charm_count > 0)
 						skillratio += 25 * sd->charm_count;
 					break;
 				case NJ_RAIGEKISAI:
-					skillratio += 60 + 40 * skill_lv;
+					// skillratio += 60 + 40 * skill_lv;
 					if (sd && sd->charm_type == CHARM_TYPE_WIND && sd->charm_count > 0)
 						skillratio += 15 * sd->charm_count;
 					break;
@@ -1750,69 +1750,69 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 100 * skill_lv;
 					break;
 			#ifdef RENEWAL
-				case WZ_HEAVENDRIVE:
-				case WZ_METEOR:
-					skillratio += 25;
-					break;
-				case WZ_VERMILION:
-				{
-					int interval = 0, per = interval, ratio = per;
-					while( (per++) < skill_lv ){
-						ratio += interval;
-						if(per%3==0) interval += 20;
-					}
-					if( skill_lv > 9 )
-						ratio -= 10;
-					skillratio += ratio;
-				}
-					break;
+				// case WZ_HEAVENDRIVE:
+				// case WZ_METEOR:
+				// 	skillratio += 25;
+				// 	break;
+				// case WZ_VERMILION:
+				// {
+				// 	int interval = 0, per = interval, ratio = per;
+				// 	while( (per++) < skill_lv ){
+				// 		ratio += interval;
+				// 		if(per%3==0) interval += 20;
+				// 	}
+				// 	if( skill_lv > 9 )
+				// 		ratio -= 10;
+				// 	skillratio += ratio;
+				// }
+				// 	break;
 				case NJ_HUUJIN:
-					skillratio += 50;
+					// skillratio += 50;
 					if (sd && sd->charm_type == CHARM_TYPE_WIND && sd->charm_count > 0)
 						skillratio += 20 * sd->charm_count;
 					break;
 			#else
-				case WZ_VERMILION:
-					skillratio += 20*skill_lv-20;
-					break;
+				// case WZ_VERMILION:
+				// 	skillratio += 20*skill_lv-20;
+				// 	break;
 			#endif
 				/**
 				 * Summoner
 				 **/
-				case SU_BITE:
-					skillratio += 100;
-					break;
-				case SU_SCRATCH:
-					skillratio += -50 + 50 * skill_lv;
-					break;
-				case SU_SCAROFTAROU:
-					skillratio += -100 + 100 * skill_lv;
-					break;
+				// case SU_BITE:
+				// 	skillratio += 100;
+				// 	break;
+				// case SU_SCRATCH:
+				// 	skillratio += -50 + 50 * skill_lv;
+				// 	break;
+				// case SU_SCAROFTAROU:
+				// 	skillratio += -100 + 100 * skill_lv;
+				// 	break;
 				case SU_PICKYPECK:
 				case SU_PICKYPECK_DOUBLE_ATK:
-					skillratio += 100 + 100 * skill_lv;
+					// skillratio += 100 + 100 * skill_lv;
 					if ((status_get_max_hp(target) / 100) <= 50)
 						skillratio *= 2;
 					if (sd != NULL && pc->checkskill(sd, SU_SPIRITOFLIFE) > 0)
 						skillratio += skillratio * status_get_hp(src) / status_get_max_hp(src);
 					break;
-				case SU_LUNATICCARROTBEAT:
-					skillratio += 100 + 100 * skill_lv;
-					break;
+				// case SU_LUNATICCARROTBEAT:
+				// 	skillratio += 100 + 100 * skill_lv;
+				// 	break;
 				/**
 				 * Arch Bishop
 				**/
-				case AB_JUDEX:
-					skillratio = 300 + 20 * skill_lv;
-					RE_LVL_DMOD(100);
-					break;
-				case AB_ADORAMUS:
-					skillratio = 500 + 100 * skill_lv;
-					RE_LVL_DMOD(100);
-					break;
-				case AB_DUPLELIGHT_MAGIC:
-					skillratio = 200 + 20 * skill_lv;
-					break;
+				// case AB_JUDEX:
+				// 	skillratio = 300 + 20 * skill_lv;
+				// 	RE_LVL_DMOD(100);
+				// 	break;
+				// case AB_ADORAMUS:
+				// 	skillratio = 500 + 100 * skill_lv;
+				// 	RE_LVL_DMOD(100);
+				// 	break;
+				// case AB_DUPLELIGHT_MAGIC:
+				// 	skillratio = 200 + 20 * skill_lv;
+				// 	break;
 				/**
 					* Warlock
 					**/
