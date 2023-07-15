@@ -1671,6 +1671,7 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 
 		case SM_BASH:
+			// just to see how it looks like in source
 			if( sd && skill_lv > 5 && pc->checkskill(sd,SM_FATALBLOW)>0 )
 				status->change_start(src,bl,SC_STUN,500*(skill_lv-5)*sd->status.base_level/50,
 					skill_lv, 0, 0, 0, skill->get_time2(SM_FATALBLOW, skill_lv), SCFLAG_NONE, skill_id);
@@ -1740,41 +1741,40 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 
 		case WZ_METEOR:
-			sc_start(src, bl, SC_STUN, 3 * skill_lv, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
-
 		case WZ_VERMILION:
-			sc_start(src, bl, SC_BLIND, 4 * skill_lv, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		/// many others (commented a few below)
+			sc_start(src, bl, skill->get_sc_type(skill_id), skill->get_sc_chance(skill_id, skill_lv), skill_lv, skill->get_sc_duration(skill_id, skill_lv), skill_id);
 			break;
 
-		case HT_FREEZINGTRAP:
-		case MA_FREEZINGTRAP:
-			sc_start(src, bl, SC_FREEZE, (3 * skill_lv + 35), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
+		// case HT_FREEZINGTRAP:
+		// case MA_FREEZINGTRAP:
+		// 	sc_start(src, bl, SC_FREEZE, (3 * skill_lv + 35), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		// 	break;
 
-		case HT_FLASHER:
-			sc_start(src, bl, SC_BLIND, (10 * skill_lv + 30), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
+		// case HT_FLASHER:
+		// 	sc_start(src, bl, SC_BLIND, (10 * skill_lv + 30), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		// 	break;
 
-		case HT_LANDMINE:
-		case MA_LANDMINE:
-			sc_start(src, bl, SC_STUN, (5 * skill_lv + 30), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
+		// case HT_LANDMINE:
+		// case MA_LANDMINE:
+		// 	sc_start(src, bl, SC_STUN, (5 * skill_lv + 30), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		// 	break;
 
 		case HT_SHOCKWAVE:
 			status_percent_damage(src, bl, 0, 15*skill_lv+5, false);
 			break;
 
-		case HT_SANDMAN:
-		case MA_SANDMAN:
-			sc_start(src, bl, SC_SLEEP, (10 * skill_lv + 40), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
+		// case HT_SANDMAN:
+		// case MA_SANDMAN:
+		// 	sc_start(src, bl, SC_SLEEP, (10 * skill_lv + 40), skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		// 	break;
 
-		case TF_SPRINKLESAND:
-			sc_start(src, bl, SC_BLIND, 20, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
-			break;
+		// case TF_SPRINKLESAND:
+		// 	sc_start(src, bl, SC_BLIND, 20, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
+		// 	break;
 
 		case TF_THROWSTONE:
+			// this would get somewhat limited in a db-only approach; stun could be moved, blind would stay hardcoded, can't be helped..
 			if (!sc_start(src, bl, SC_STUN, 3, skill_lv, skill->get_time(skill_id, skill_lv), skill_id))
 				sc_start(src, bl, SC_BLIND, 3, skill_lv, skill->get_time2(skill_id, skill_lv), skill_id);
 			break;
