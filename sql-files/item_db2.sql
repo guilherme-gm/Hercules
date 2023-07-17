@@ -75,6 +75,7 @@ CREATE TABLE `item_db2` (
   `unequip_script` text,
   `rental_start_script` text,
   `rental_end_script` text,
+  `skill_script` text,
  PRIMARY KEY (`id`)
 ) ENGINE=MyISAM;
 
