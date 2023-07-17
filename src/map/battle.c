@@ -3536,7 +3536,8 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		}
 		if (s_sc->data[SC_POISONINGWEAPON] != NULL) {
 			if (!(flag & BF_SKILL) && (flag & BF_WEAPON) && damage > 0 && rnd() % 100 < s_sc->data[SC_POISONINGWEAPON]->val3) {
-				sc_start(src, bl, s_sc->data[SC_POISONINGWEAPON]->val2, 100, s_sc->data[SC_POISONINGWEAPON]->val1, skill->get_time2(GC_POISONINGWEAPON, 1), GC_POISONINGWEAPON);
+				struct script_code *skillscript = itemdb_skillscript(s_sc->data[SC_POISONINGWEAPON]->val2);
+				script->run_skill_item(skillscript, src, bl);
 			}
 		}
 		if( s_sc->data[SC__DEADLYINFECT] && flag&BF_SHORT && damage > 0 && rnd()%100 < 30 + 10 * s_sc->data[SC__DEADLYINFECT]->val1 && !is_boss(src) )

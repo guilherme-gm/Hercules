@@ -3879,9 +3879,11 @@ static int skill_attack(int attack_type, struct block_list *src, struct block_li
 			{
 				struct status_change *ssc = status->get_sc(src);
 				if (ssc != NULL && ssc->data[SC_POISONINGWEAPON] != NULL && rnd() % 100 < 70 + 5 * skill_lv) {
-					sc_start(src, bl, ssc->data[SC_POISONINGWEAPON]->val2, 100, ssc->data[SC_POISONINGWEAPON]->val1, skill->get_time2(GC_POISONINGWEAPON, 1), skill_id);
+					struct script_code *skillscript = itemdb_skillscript(ssc->data[SC_POISONINGWEAPON]->val2);
+					script->run_skill_item(skillscript, src, bl);
+
 					status_change_end(src, SC_POISONINGWEAPON, INVALID_TIMER);
-					clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
+					clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
 				}
 			}
 				break;
@@ -13379,9 +13381,9 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 			break;
 			}
 		case GC_POISONSMOKE:
-			if( !(sc && sc->data[SC_POISONINGWEAPON]) )
+			if (sc == NULL || sc->data[SC_POISONINGWEAPON] == NULL)
 				return NULL;
-			val2 = sc->data[SC_POISONINGWEAPON]->val2; // Type of Poison
+			val2 = sc->data[SC_POISONINGWEAPON]->val2; // Poison item ID
 			val3 = sc->data[SC_POISONINGWEAPON]->val1;
 			limit = 4000 + 2000 * skill_lv;
 			break;
@@ -14425,7 +14427,8 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 		case UNT_POISONSMOKE:
 			if (battle->check_target(ss,bl,BCT_ENEMY) > 0 && !(tsc != NULL && tsc->data[sg->val2] != NULL)
 			    && rnd() % 100 < 50) {
-				sc_start(ss, bl, sg->val2, 100, sg->val1, skill->get_time2(GC_POISONINGWEAPON, 1), skill_id);
+				struct script_code *skillscript = itemdb_skillscript(sg->val2);
+				script->run_skill_item(skillscript, ss, bl);
 			}
 			break;
 
@@ -20313,32 +20316,18 @@ static int skill_arrow_create(struct map_session_data *sd, int nameid)
 
 static int skill_poisoningweapon(struct map_session_data *sd, int nameid)
 {
-	sc_type type;
 	int chance, i;
 	nullpo_ret(sd);
-	if (nameid <= 0 || (i = pc->search_inventory(sd,nameid)) == INDEX_NOT_FOUND || pc->delitem(sd, i, 1, 0, DELITEM_NORMAL, LOG_TYPE_CONSUME)) {
+	if (!itemdb_is_poison(nameid) || (i = pc->search_inventory(sd,nameid)) == INDEX_NOT_FOUND
+	    || pc->delitem(sd, i, 1, 0, DELITEM_NORMAL, LOG_TYPE_CONSUME) != 0) {
 		clif->skill_fail(sd, GC_POISONINGWEAPON, USESKILL_FAIL_LEVEL, 0, 0);
 		return 0;
-	}
-	switch( nameid )
-	{ // t_lv used to take duration from skill->get_time2
-		case ITEMID_POISON_PARALYSIS:     type = SC_PARALYSE;      break;
-		case ITEMID_POISON_FEVER:         type = SC_PYREXIA;       break;
-		case ITEMID_POISON_CONTAMINATION: type = SC_DEATHHURT;     break;
-		case ITEMID_POISON_LEECH:         type = SC_LEECHESEND;    break;
-		case ITEMID_POISON_FATIGUE:       type = SC_VENOMBLEED;    break;
-		case ITEMID_POISON_NUMB:          type = SC_TOXIN;         break;
-		case ITEMID_POISON_LAUGHING:      type = SC_MAGICMUSHROOM; break;
-		case ITEMID_POISON_OBLIVION:      type = SC_OBLIVIONCURSE; break;
-		default:
-			clif->skill_fail(sd, GC_POISONINGWEAPON, USESKILL_FAIL_LEVEL, 0, 0);
-			return 0;
 	}
 
 	status_change_end(&sd->bl, SC_POISONINGWEAPON, INVALID_TIMER); // Status must be forced to end so that a new poison will be applied if a player decides to change poisons. [Rytech]
 	chance = 2 + 2 * sd->menuskill_val; // 2 + 2 * skill_lv
-	sc_start4(&sd->bl, &sd->bl, SC_POISONINGWEAPON, 100, pc->checkskill(sd, GC_RESEARCHNEWPOISON), //in Aegis it store the level of GC_RESEARCHNEWPOISON in val1
-		type, chance, 0, skill->get_time(GC_POISONINGWEAPON, sd->menuskill_val), GC_POISONINGWEAPON);
+	sc_start4(&sd->bl, &sd->bl, SC_POISONINGWEAPON, 100, sd->menuskill_val,
+		nameid, chance, 0, skill->get_time(GC_POISONINGWEAPON, sd->menuskill_val), GC_POISONINGWEAPON);
 
 	return 0;
 }
