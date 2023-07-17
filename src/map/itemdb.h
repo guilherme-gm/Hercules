@@ -577,6 +577,7 @@ struct item_data {
 	struct script_code *unequip_script; ///< Script executed once when unequipping.
 	struct script_code *rental_start_script; ///< Script executed once this item get rented
 	struct script_code *rental_end_script;   ///< Script executed once this item rent ends
+	struct script_code *skill_script;        ///< Script executed when this item is part of a skill effect
 	struct {
 		unsigned available : 1;
 		unsigned no_refine : 1; // [celest]
@@ -631,6 +632,7 @@ struct item_data {
 #define itemdb_equip(n)       (itemdb->search(n)->equip)
 #define itemdb_usescript(n)   (itemdb->search(n)->script)
 #define itemdb_equipscript(n) (itemdb->search(n)->script)
+#define itemdb_skillscript(n) (itemdb->search(n)->skill_script)
 #define itemdb_wlv(n)         (itemdb->search(n)->wlv)
 #define itemdb_range(n)       (itemdb->search(n)->range)
 #define itemdb_slot(n)        (itemdb->search(n)->slot)

@@ -1790,6 +1790,10 @@ static int itemdb_validate_entry(struct item_data *entry, int n, const char *sou
 			script->free_code(entry->rental_end_script);
 			entry->rental_end_script = NULL;
 		}
+		if (entry->skill_script != NULL) {
+			script->free_code(entry->skill_script);
+			entry->skill_script = NULL;
+		}
 		return 0;
 #if PACKETVER_MAIN_NUM >= 20181121 || PACKETVER_RE_NUM >= 20180704 || PACKETVER_ZERO_NUM >= 20181114
 	}
@@ -1827,6 +1831,10 @@ static int itemdb_validate_entry(struct item_data *entry, int n, const char *sou
 			if (entry->rental_end_script != NULL) {
 				script->free_code(entry->rental_end_script);
 				entry->rental_end_script = NULL;
+			}
+			if (entry->skill_script != NULL) {
+				script->free_code(entry->skill_script);
+				entry->skill_script = NULL;
 			}
 			return 0;
 		}
@@ -1965,6 +1973,10 @@ static int itemdb_validate_entry(struct item_data *entry, int n, const char *sou
 	if (item->rental_end_script != NULL && item->rental_end_script != entry->rental_end_script) { // Don't free if it's inheriting the same script
 		script->free_code(item->rental_end_script);
 		item->rental_end_script = NULL;
+	}
+	if (item->skill_script != NULL && item->skill_script != entry->skill_script) { // Don't free if it's inheriting the same script
+		script->free_code(item->skill_script);
+		item->skill_script = NULL;
 	}
 	*item = *entry;
 	return item->nameid;
@@ -2405,6 +2417,11 @@ static int itemdb_readdb_libconfig_sub(struct config_setting_t *it, int n, const
 		id.rental_end_script = (*str != '\0') ? script->parse(str, source, -id.nameid, SCRIPT_IGNORE_EXTERNAL_BRACKETS, NULL) : NULL;
 	else if (clone && id.rental_end_script != NULL)
 		id.rental_end_script = script->clone_script(id.rental_end_script);
+
+	if (libconfig->setting_lookup_string(it, "SkillScript", &str) != CONFIG_FALSE)
+		id.skill_script = (*str != '\0') ? script->parse(str, source, -id.nameid, SCRIPT_IGNORE_EXTERNAL_BRACKETS, NULL) : NULL;
+	else if (clone && id.skill_script != NULL)
+		id.skill_script = script->clone_script(id.skill_script);
 
 	return itemdb->validate_entry(&id, n, source);
 }
@@ -3072,6 +3089,8 @@ static void destroy_item_data(struct item_data *self, int free_self)
 		script->free_code(self->rental_start_script);
 	if (self->rental_end_script != NULL)
 		script->free_code(self->rental_end_script);
+	if (self->skill_script != NULL)
+		script->free_code(self->skill_script);
 	if( self->combos )
 		aFree(self->combos);
 	if (self->lapineddukddak != NULL) {

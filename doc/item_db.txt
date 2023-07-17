@@ -108,6 +108,7 @@ item_db: (
 	OnUnequipScript: <" OnUnequip Script (can also be multi-line) ">
 	OnRentalStartScript: <" On item renting script, gets called after item is created in inventory (can also be multi-line) ">
 	OnRentalEndScript: <" On item rent end/expire script, gets called after item is removed from inventory (can also be multi-line) ">
+	SkillScript: <" Script executed when the item contains an additional effect for a skill (can also be multi-line) ">
 	// =================== Optional fields (item_db2 only) ================
 	Inherit: true/false           (boolean, if true, inherit the values
 	                              that weren't specified, from item_db.conf,
@@ -413,6 +414,17 @@ OnUnequipScript: Script to execute when the item is unequipped.
 OnRentalStartScript: On item renting script, gets called after item is created in inventory.
 
 OnRentalEndScript: On item rent end/expire script, gets called after item is removed from inventory.
+
+SkillScript: Some skills requires the user to choose an item that will carry some sort of extra effect
+             while using it. This script is meant to be used for those.
+             Example: Guillotine Cross Poisoning Weapon, where the poison selected by the player will
+             cause different status changes on their target. The effect of the poison is stored in SkillScript.
+             Note that it only works for skills that does make use of this script.
+
+             When SkillScript is run, 2 scope variables are set to allow further calculation to be made:
+             - .@casterGid : GID of the unit who is causing the effect (e.g. the owner of the item)
+             - .@targetGid : GID of the unit who is receiving the effect (0 if no target)
+             They are not necessarily a player (may be a monster, NPC, etc)
 
 Inherit: This can be used only in item_db2.conf, and if set to true, and the
          item already exists in item_db.conf, all the missing fields will be

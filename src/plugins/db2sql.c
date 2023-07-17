@@ -480,6 +480,20 @@ int itemdb2sql_sub(struct config_setting_t *entry, int n, const char *source, st
 				RECREATE(tosql.buf[4].p,char,tosql.buf[4].len);
 			}
 			SQL->EscapeString(sql_handle, tosql.buf[4].p, str);
+			StrBuf->Printf(&buf, "'%s',", tosql.buf[4].p);
+		} else {
+			StrBuf->AppendStr(&buf, "'',");
+		}
+
+		// skill_script
+		if (it->skill_script != NULL && libconfig->setting_lookup_string(entry, "SkillScript", &bonus)) {
+			hstr(bonus);
+			str = tosql.buf[5].p;
+			if (strlen(str) > tosql.buf[4].len) {
+				tosql.buf[4].len = tosql.buf[4].len + strlen(str) + 1000;
+				RECREATE(tosql.buf[4].p,char,tosql.buf[4].len);
+			}
+			SQL->EscapeString(sql_handle, tosql.buf[4].p, str);
 			StrBuf->Printf(&buf, "'%s'", tosql.buf[4].p);
 		} else {
 			StrBuf->AppendStr(&buf, "''");
@@ -553,6 +567,7 @@ void itemdb2sql_tableheader(void)
 			"  `unequip_script` text,\n"
 			"  `rental_start_script` text,\n"
 			"  `rental_end_script` text,\n"
+			"  `skill_script` text,\n"
 			" PRIMARY KEY (`id`)\n"
 			") ENGINE=MyISAM;\n"
 			"\n", tosql.db_name,tosql.db_name,tosql.db_name);

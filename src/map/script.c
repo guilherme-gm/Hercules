@@ -4928,6 +4928,33 @@ static void run_script(struct script_code *rootscript, int pos, int rid, int oid
 	script->run_main(st);
 }
 
+/**
+ * Executes a script providing the parameters needed for item's SkillScript.
+ *
+ * This function takes care of setting the variables used by SkillScript.
+ * @param rootscript script to be run (usually from itemdb_skillscript)
+ * @param src unit who is causing the effect to run
+ * @param target unit who is receiving the effect
+ */
+static void run_skill_item_script(struct script_code *rootscript, struct block_list *src, struct block_list *target)
+{
+	nullpo_retv(src);
+
+	if (rootscript == NULL)
+		return;
+
+	// TODO In jAthena, this function can take over the pending script in the player. [FlavioJS]
+	//      It is unclear how that can be triggered, so it needs the be traced/checked in more detail.
+	// NOTE At the time of this change, this function wasn't capable of taking over the script state because st->scriptroot was never set.
+	struct script_state *st = script->alloc_state(rootscript, 0, src->id, 0);
+	nullpo_retv(st);
+
+	script->setd_sub(st, NULL, ".@casterGid", 0, (void *) h64BPTRSIZE(src->id), NULL);
+	script->setd_sub(st, NULL, ".@targetGid", 0, (void *) h64BPTRSIZE((target != NULL ? target->id : 0)), NULL);
+
+	script->run_main(st);
+}
+
 static void script_stop_instances(struct script_code *code)
 {
 	struct DBIterator *iter;
@@ -30114,6 +30141,7 @@ void script_defaults(void)
 	script->get_constant = script_get_constant;
 	script->label_add = script_label_add;
 	script->run = run_script;
+	script->run_skill_item = run_skill_item_script;
 	script->run_npc = run_script;
 	script->run_pet = run_script;
 	script->run_main = run_script_main;

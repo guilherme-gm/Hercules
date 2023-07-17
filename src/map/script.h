@@ -964,6 +964,7 @@ struct script_interface {
 	bool (*get_constant) (const char* name, int* value);
 	void (*label_add)(int key, int pos, enum script_label_flags flags);
 	void (*run) (struct script_code *rootscript, int pos, int rid, int oid);
+	void (*run_skill_item) (struct script_code *rootscript, struct block_list *src, struct block_list *target);
 	void (*run_npc) (struct script_code *rootscript, int pos, int rid, int oid);
 	void (*run_pet) (struct script_code *rootscript, int pos, int rid, int oid);
 	void (*run_main) (struct script_state *st);
