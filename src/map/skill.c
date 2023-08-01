@@ -7335,7 +7335,6 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case PR_SLOWPOISON:
 		case PR_IMPOSITIO:
 		case PR_LEXAETERNA:
-		case PR_SUFFRAGIUM:
 		case PR_BENEDICTIO:
 		case LK_BERSERK:
 		case MS_BERSERK:
@@ -7348,6 +7347,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 		case AS_POISONREACT:
 #ifndef RENEWAL
 		case MC_LOUD:
+		case PR_SUFFRAGIUM:
 #endif
 		case MG_ENERGYCOAT:
 		case MO_EXPLOSIONSPIRITS:
@@ -7905,6 +7905,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 
 #ifdef RENEWAL
 		case MC_LOUD:
+		case PR_SUFFRAGIUM:
 #endif
 		case AL_ANGELUS:
 		case PR_MAGNIFICAT:
@@ -17282,7 +17283,9 @@ static int skill_castfix_sc(struct block_list *bl, int time)
 			time += sc->data[SC_NEEDLE_OF_PARALYZE]->val3;
 		if (sc->data[SC_SUFFRAGIUM]) {
 			time -= time * sc->data[SC_SUFFRAGIUM]->val2 / 100;
+#ifndef RENEWAL
 			status_change_end(bl, SC_SUFFRAGIUM, INVALID_TIMER);
+#endif
 		}
 		if (sc->data[SC_MEMORIZE]) {
 			time>>=1;
@@ -17362,7 +17365,9 @@ static int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, 
 		// Variable cast reduction bonuses
 		if (sc->data[SC_SUFFRAGIUM]) {
 			VARCAST_REDUCTION(sc->data[SC_SUFFRAGIUM]->val2);
+#ifndef RENEWAL
 			status_change_end(bl, SC_SUFFRAGIUM, INVALID_TIMER);
+#endif
 		}
 		if (sc->data[SC_MEMORIZE]) {
 			VARCAST_REDUCTION(50);
