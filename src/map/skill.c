@@ -18004,42 +18004,46 @@ static void skill_autospell_select_spell(struct block_list *bl, int skill_lv)
 		skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
 }
 
-static int skill_autospell(struct map_session_data *sd, uint16 skill_id)
+/**
+ * Initiates AutoSpell effect on player based on the skill they chose.
+ * 
+ * // @FIXME: Why this always returns 0? Does it even make sense?
+ * @param sd player casting the skill
+ * @param skill_id selected skill
+ * @returns always returns 0
+ */
+static int skill_autospell_spell_selected(struct map_session_data *sd, uint16 skill_id)
 {
-	uint16 skill_lv;
-	int maxlv=1,lv;
-
 	nullpo_ret(sd);
 
-	skill_lv = sd->menuskill_val;
-	lv=pc->checkskill(sd,skill_id);
+	uint16 autospell_lv = sd->menuskill_val;
+	int skill_lv = pc->checkskill(sd, skill_id);
 
-	if(!skill_lv || !lv) return 0; // Player must learn the skill before doing auto-spell [Lance]
+	if(autospell_lv == 0 || skill_lv == 0)
+		return 0; // Player must learn the skill before doing auto-spell [Lance]
 
-	if(skill_id==MG_NAPALMBEAT) maxlv=3;
-	else if(skill_id==MG_COLDBOLT || skill_id==MG_FIREBOLT || skill_id==MG_LIGHTNINGBOLT){
-		if (sd->sc.data[SC_SOULLINK] && sd->sc.data[SC_SOULLINK]->val2 == SL_SAGE)
-			maxlv =10; //Soul Linker bonus. [Skotlex]
-		else if(skill_lv==2) maxlv=1;
-		else if(skill_lv==3) maxlv=2;
-		else if(skill_lv>=4) maxlv=3;
+	const struct autospell_skill *skills_list;
+	int list_len = skill->autospell_list(&skills_list);
+	
+	int skill_idx;
+	ARR_FIND(0, list_len, skill_idx, (skills_list + skill_idx)->skill_id == skill_id);
+	if (skill_idx == list_len)
+		return 0; // Not an AutoSpell skill (exploit attempt?)
+
+	const struct autospell_skill *sk = (skills_list + skill_idx);
+	if (sk->autospell_level > autospell_lv)
+		return 0; // Don't have enough level to use
+
+	int max_lv = sk->skill_lv[autospell_lv - 1];
+	if (sd->sc.data[SC_SOULLINK] != NULL && sd->sc.data[SC_SOULLINK]->val2 == SL_SAGE) {
+		if (skill_id == MG_COLDBOLT || skill_id == MG_FIREBOLT || skill_id == MG_LIGHTNINGBOLT)
+			max_lv = 10; // Soul Linker bonus. [Skotlex]
 	}
-	else if(skill_id==MG_SOULSTRIKE){
-		if(skill_lv==5) maxlv=1;
-		else if(skill_lv==6) maxlv=2;
-		else if(skill_lv>=7) maxlv=3;
-	}
-	else if(skill_id==MG_FIREBALL){
-		if(skill_lv==8) maxlv=1;
-		else if(skill_lv>=9) maxlv=2;
-	}
-	else if(skill_id==MG_FROSTDIVER) maxlv=1;
-	else return 0;
 
-	if(maxlv > lv)
-		maxlv = lv;
+	if (max_lv > skill_lv)
+		max_lv = skill_lv;
 
-	sc_start4(&sd->bl,&sd->bl,SC_AUTOSPELL,100,skill_lv,skill_id,maxlv,0,
+	sc_start4(&sd->bl, &sd->bl, SC_AUTOSPELL, 100, skill_lv, skill_id, max_lv, 0,
 		skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
 	return 0;
 }
@@ -25189,7 +25193,7 @@ void skill_defaults(void)
 	skill->autospell_list = skill_autospell_list;
 	skill->autospell_select_spell = skill_autospell_select_spell;
 	skill->autospell_select_spell_pc = skill_autospell_select_spell_pc;
-	skill->autospell = skill_autospell;
+	skill->autospell_spell_selected = skill_autospell_spell_selected;
 	skill->calc_heal = skill_calc_heal;
 	skill->check_cloaking = skill_check_cloaking;
 	skill->check_cloaking_end = skill_check_cloaking_end;
