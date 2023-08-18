@@ -5318,7 +5318,7 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			} else {
 				sc_start(src, src, SC_NO_SWITCH_WEAPON, 100, 1, skill->get_time(skill_id, skill_lv), skill_id);
 				skill->area_temp[0] = map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), BL_CHAR, src, skill_id, skill_lv, tick, BCT_ENEMY, skill->area_sub_count);
-				
+
 				// recursive invocation of skill->castend_damage_id() with flag|1
 				map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv), skill->splash_target(src), src, skill_id, skill_lv, tick, flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
 			}
@@ -10145,7 +10145,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			int level = 0;
 			if (sd != NULL)
 				level = skill_id == AB_CLEMENTIA ? pc->checkskill(sd, AL_BLESSING) : pc->checkskill(sd, AL_INCAGI);
-			
+
 			if (sd == NULL || sd->status.party_id == 0 || flag & 1) {
 				clif->skill_nodamage(bl, bl, skill_id, skill_lv, sc_start(src, bl, type, 100, level, skill->get_time(skill_id, skill_lv), skill_id));
 			} else if (sd != NULL) {
@@ -17962,8 +17962,17 @@ static void skill_autospell_select_spell(struct block_list *bl, int skill_lv)
 	if ((upper_idx - lower_idx) > 1)
 		skill_idx += rnd() % (upper_idx - lower_idx);
 
+	// @TODO: Is this how AutoSpell works for non-players after rebalance? I made it the same as the player one...
 	const struct s_autospell_db *sk = &skill->dbs->autospell_db[skill_idx];
-	sc_start4(bl, bl, SC_AUTOSPELL, 100, skill_lv, sk->skill_id, sk->skill_lv[skill_lv - 1], 0,
+	int spell_level = sk->skill_lv[skill_lv - 1];
+	if (spell_level == HALF_AUTOSPELL_LEVEL) {
+		spell_level = skill_lv / 2;
+
+		if (spell_level == 0)
+			spell_level = 1;
+	}
+
+	sc_start4(bl, bl, SC_AUTOSPELL, 100, skill_lv, sk->skill_id, spell_level, 0,
 		skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
 }
 
@@ -17995,6 +18004,14 @@ static int skill_autospell_spell_selected(struct map_session_data *sd, uint16 sk
 		return 0; // Don't have enough level to use
 
 	int max_lv = sk->skill_lv[autospell_lv - 1];
+
+	if (max_lv == HALF_AUTOSPELL_LEVEL) {
+		max_lv = autospell_lv / 2;
+
+		if (max_lv == 0)
+			max_lv = 1;
+	}
+
 	if (sk->spirit_boost && sd->sc.data[SC_SOULLINK] != NULL && sd->sc.data[SC_SOULLINK]->val2 == SL_SAGE)
 		max_lv = skill->dbs->db[skill->get_index(skill_id)].max; // Soul Linker bonus. [Skotlex]
 
@@ -24919,8 +24936,8 @@ static void skill_read_autospell_skill_level(struct config_setting_t *conf, stru
 			snprintf(lv, sizeof(lv), "Lv%d", i + 1);
 
 			int level;
-			if (libconfig->setting_lookup_int(t, lv, &level) == CONFIG_TRUE) {
-				if (level >= 0 && level <= MAX_SKILL_LEVEL)
+			if (map->setting_lookup_const(t, lv, &level) == CONFIG_TRUE) {
+				if ((level >= 0 && level <= MAX_SKILL_LEVEL) || level == HALF_AUTOSPELL_LEVEL)
 					sk->skill_lv[i] = level;
 				else
 					ShowWarning("%s: Invalid SkillLevel %d specified in level %d for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
@@ -24932,8 +24949,8 @@ static void skill_read_autospell_skill_level(struct config_setting_t *conf, stru
 	}
 
 	int level;
-	if (libconfig->setting_lookup_int(conf, "SkillLevel", &level) == CONFIG_TRUE) {
-		if (level >= 0 && level <= MAX_SKILL_LEVEL)
+	if (map->setting_lookup_const(conf, "SkillLevel", &level) == CONFIG_TRUE) {
+		if ((level >= 0 && level <= MAX_SKILL_LEVEL) || level == HALF_AUTOSPELL_LEVEL)
 			skill->level_set_value(sk->skill_lv, level);
 		else
 			ShowWarning("%s: Invalid SkillLevel %d specified for skill ID %d in %s! Minimum is 0, maximum is %d. Defaulting to 0...\n",
