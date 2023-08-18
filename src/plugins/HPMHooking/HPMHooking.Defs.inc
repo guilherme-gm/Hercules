@@ -1566,8 +1566,8 @@ typedef void (*HPMHOOK_pre_clif_skill_produce_mix_list) (struct map_session_data
 typedef void (*HPMHOOK_post_clif_skill_produce_mix_list) (struct map_session_data *sd, int skill_id, int trigger);
 typedef void (*HPMHOOK_pre_clif_cooking_list) (struct map_session_data **sd, int *trigger, uint16 *skill_id, int *qty, int *list_type);
 typedef void (*HPMHOOK_post_clif_cooking_list) (struct map_session_data *sd, int trigger, uint16 skill_id, int qty, int list_type);
-typedef void (*HPMHOOK_pre_clif_autospell) (struct map_session_data **sd, uint16 *skill_lv);
-typedef void (*HPMHOOK_post_clif_autospell) (struct map_session_data *sd, uint16 skill_lv);
+typedef void (*HPMHOOK_pre_clif_autospell) (struct map_session_data **sd, uint16 *skill_lv, int **skill_ids_list, int *list_len);
+typedef void (*HPMHOOK_post_clif_autospell) (struct map_session_data *sd, uint16 skill_lv, int *skill_ids_list, int list_len);
 typedef void (*HPMHOOK_pre_clif_combo_delay) (struct block_list **bl, int *wait);
 typedef void (*HPMHOOK_post_clif_combo_delay) (struct block_list *bl, int wait);
 typedef void (*HPMHOOK_pre_clif_status_change) (struct block_list **bl, int *relevant_bl, int *type, int *flag, int *total_tick, int *val1, int *val2, int *val3);
@@ -8466,6 +8466,12 @@ typedef void (*HPMHOOK_pre_skill_identify) (struct map_session_data **sd, int *i
 typedef void (*HPMHOOK_post_skill_identify) (struct map_session_data *sd, int idx);
 typedef void (*HPMHOOK_pre_skill_weaponrefine) (struct map_session_data **sd, int *idx);
 typedef void (*HPMHOOK_post_skill_weaponrefine) (struct map_session_data *sd, int idx);
+typedef int (*HPMHOOK_pre_skill_autospell_list) (const struct autospell_skill ***list);
+typedef int (*HPMHOOK_post_skill_autospell_list) (int retVal___, const struct autospell_skill **list);
+typedef void (*HPMHOOK_pre_skill_autospell_select_spell) (struct block_list **bl, int *skill_lv);
+typedef void (*HPMHOOK_post_skill_autospell_select_spell) (struct block_list *bl, int skill_lv);
+typedef void (*HPMHOOK_pre_skill_autospell_select_spell_pc) (struct map_session_data **sd, int *skill_lv);
+typedef void (*HPMHOOK_post_skill_autospell_select_spell_pc) (struct map_session_data *sd, int skill_lv);
 typedef int (*HPMHOOK_pre_skill_autospell) (struct map_session_data **md, uint16 *skill_id);
 typedef int (*HPMHOOK_post_skill_autospell) (int retVal___, struct map_session_data *md, uint16 skill_id);
 typedef int (*HPMHOOK_pre_skill_calc_heal) (struct block_list **src, struct block_list **target, uint16 *skill_id, uint16 *skill_lv, bool *heal);
@@ -9164,6 +9170,8 @@ typedef short (*HPMHOOK_pre_status_calc_mdef2) (struct block_list **bl, struct s
 typedef short (*HPMHOOK_post_status_calc_mdef2) (short retVal___, struct block_list *bl, struct status_change *sc, int mdef2, bool viewable);
 typedef int (*HPMHOOK_pre_status_calc_batk) (struct block_list **bl, struct status_change **sc, int *batk, bool *viewable);
 typedef int (*HPMHOOK_post_status_calc_batk) (int retVal___, struct block_list *bl, struct status_change *sc, int batk, bool viewable);
+typedef int (*HPMHOOK_pre_status_calc_buff_extra_batk) (struct block_list **bl, struct status_change **sc);
+typedef int (*HPMHOOK_post_status_calc_buff_extra_batk) (int retVal___, struct block_list *bl, struct status_change *sc);
 typedef int (*HPMHOOK_pre_status_base_matk) (struct block_list **bl, const struct status_data **st, int *level);
 typedef int (*HPMHOOK_post_status_base_matk) (int retVal___, struct block_list *bl, const struct status_data *st, int level);
 typedef int (*HPMHOOK_pre_status_get_weapon_atk) (struct block_list **src, struct weapon_atk **watk, int *flag);

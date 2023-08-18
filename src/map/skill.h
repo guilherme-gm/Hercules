@@ -1870,6 +1870,12 @@ struct s_skill_db {
 	struct skill_required_item_data req_equip;
 };
 
+struct autospell_skill {
+	int autospell_level;
+	int skill_id;
+	int skill_lv[MAX_SKILL_LEVEL];
+};
+
 struct s_skill_unit_layout {
 	int count;
 	int dx[MAX_SKILL_UNIT_COUNT];
@@ -2155,6 +2161,9 @@ struct skill_interface {
 	void (*repairweapon) (struct map_session_data *sd, int idx);
 	void (*identify) (struct map_session_data *sd,int idx);
 	void (*weaponrefine) (struct map_session_data *sd,int idx);
+	int (*autospell_list) (const struct autospell_skill **list);
+	void (*autospell_select_spell) (struct block_list *bl, int skill_lv);
+	void (*autospell_select_spell_pc) (struct map_session_data *sd, int skill_lv);
 	int (*autospell) (struct map_session_data *md,uint16 skill_id);
 	int (*calc_heal) (struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, bool heal);
 	bool (*check_cloaking) (struct block_list *bl, struct status_change_entry *sce);

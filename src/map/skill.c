@@ -8864,43 +8864,8 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id);
 			break;
 		case SA_AUTOSPELL:
-			clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
-			if(sd){
-				sd->state.workinprogress = 3;
-				clif->autospell(sd,skill_lv);
-			}else {
-				int maxlv=1,spellid=0;
-				static const int spellarray[3] = { MG_COLDBOLT,MG_FIREBOLT,MG_LIGHTNINGBOLT };
-				if(skill_lv >= 10) {
-					spellid = MG_FROSTDIVER;
-#if 0
-					if (tsc && tsc->data[SC_SOULLINK] && tsc->data[SC_SOULLINK]->val2 == SA_SAGE)
-						maxlv = 10;
-					else
-#endif // 0
-						maxlv = skill_lv - 9;
-				}
-				else if(skill_lv >=8) {
-					spellid = MG_FIREBALL;
-					maxlv = skill_lv - 7;
-				}
-				else if(skill_lv >=5) {
-					spellid = MG_SOULSTRIKE;
-					maxlv = skill_lv - 4;
-				}
-				else if(skill_lv >=2) {
-					int i = rnd() % ARRAYLENGTH(spellarray);
-					spellid = spellarray[i];
-					maxlv = skill_lv - 1;
-				}
-				else if(skill_lv > 0) {
-					spellid = MG_NAPALMBEAT;
-					maxlv = 3;
-				}
-				if(spellid > 0)
-					sc_start4(src,src,SC_AUTOSPELL,100,skill_lv,spellid,maxlv,0,
-						skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
-			}
+			clif->skill_nodamage(src, bl, skill_id, skill_lv, 1);
+			skill->autospell_select_spell(src, skill_lv);
 			break;
 
 		case BS_GREED:
@@ -17930,8 +17895,115 @@ static void skill_weaponrefine(struct map_session_data *sd, int idx)
 }
 
 /*==========================================
- *
+ * Auto Spell / Hindsight
  *------------------------------------------*/
+
+/**
+ * Returns the list of skills Auto Spell may use and their conditions.
+ * 
+ * The list is SORTED by the required autospell level (autospell_level field)
+ * 
+ * @param list pointer to receive the list's pointer (pointer to an array)
+ * @returns list length
+ */
+static int skill_autospell_list(const struct autospell_skill **list)
+{
+	nullpo_retr(0, list);
+
+	// MUST be sorted by autospell_level (first field)
+	static const struct autospell_skill skills_list[] = {
+		{ 1, MG_NAPALMBEAT,    { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 } },
+		{ 2, MG_COLDBOLT,      { 0, 1, 2, 3, 3, 3, 3, 3, 3, 3 } },
+		{ 2, MG_FIREBOLT,      { 0, 1, 2, 3, 3, 3, 3, 3, 3, 3 } },
+		{ 2, MG_LIGHTNINGBOLT, { 0, 1, 2, 3, 3, 3, 3, 3, 3, 3 } },
+		{ 5, MG_SOULSTRIKE,    { 0, 0, 0, 0, 1, 2, 3, 3, 3, 3 } },
+		{ 8, MG_FIREBALL,      { 0, 0, 0, 0, 0, 0, 0, 1, 2, 2 } },
+		{ 10, MG_FROSTDIVER,   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 } },
+	};
+	static const int list_len = ARRAYLENGTH(skills_list);
+
+#if PACKETVER_MAIN_NUM < 20181128 && PACKETVER_RE_NUM < 20181031
+	STATIC_ASSERT(ARRAYLENGTH(skills_list) <= 7,
+		"Older clients only supports AutoSpell list with up to 7 skills. Customize the list above or update your client.");
+#endif
+
+	*list = skills_list;
+	return list_len;
+}
+
+/**
+ * Prepares list and request player to choose the spell they want to use (Auto Spell skill)
+ * @param sd player casting the skill
+ * @param skill_lv Auto Spell level
+ */
+static void skill_autospell_select_spell_pc(struct map_session_data *sd, int skill_lv)
+{
+	nullpo_retv(sd);
+
+	const struct autospell_skill *skills_list;
+	int list_len = skill->autospell_list(&skills_list);
+	
+	int *skill_ids;
+	CREATE(skill_ids, int, list_len);
+	
+	int valid_len = 0;
+	
+	for (int i = 0; i < list_len; ++i) {
+		const struct autospell_skill *sk = (skills_list + i);
+		
+		if (skill_lv >= sk->autospell_level && pc->checkskill(sd, sk->skill_id) > 0) {
+			skill_ids[valid_len] = sk->skill_id;
+			valid_len++;
+		}
+	}
+
+	sd->state.workinprogress = 3;
+	clif->autospell(sd, skill_lv, skill_ids, valid_len);
+
+	aFree(skill_ids);
+}
+
+/**
+ * Auto Spell skill spell selection step.
+ * @param bl unit casting the skill
+ * @param skill_lv skill level
+ */
+static void skill_autospell_select_spell(struct block_list *bl, int skill_lv)
+{
+	nullpo_retv(bl);
+
+	if (bl->type == BL_PC) {
+		skill->autospell_select_spell_pc(BL_CAST(BL_PC, bl), skill_lv);
+		return;
+	}
+
+	const struct autospell_skill *skills_list;
+	int list_len = skill->autospell_list(&skills_list);
+
+	int lower_idx = -1;
+	int upper_idx = 0;
+	int highest_autospell_tier = 0;
+	while (upper_idx < list_len && skills_list[upper_idx].autospell_level <= skill_lv) {
+		if (highest_autospell_tier != skills_list[upper_idx].autospell_level) {
+			lower_idx = upper_idx;
+			highest_autospell_tier = skills_list[upper_idx].autospell_level;
+		}
+ 
+		upper_idx++;
+	}
+	
+	if (lower_idx == -1)
+		return; // No skill available
+
+	int skill_idx = lower_idx;
+	if ((upper_idx - lower_idx) > 1)
+		skill_idx += rnd() % (upper_idx - lower_idx);
+
+	const struct autospell_skill *sk = (skills_list + skill_idx);
+	sc_start4(bl, bl, SC_AUTOSPELL, 100, skill_lv, sk->skill_id, sk->skill_lv[skill_lv - 1], 0,
+		skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
+}
+
 static int skill_autospell(struct map_session_data *sd, uint16 skill_id)
 {
 	uint16 skill_lv;
@@ -25114,6 +25186,9 @@ void skill_defaults(void)
 	skill->repairweapon = skill_repairweapon;
 	skill->identify = skill_identify;
 	skill->weaponrefine = skill_weaponrefine;
+	skill->autospell_list = skill_autospell_list;
+	skill->autospell_select_spell = skill_autospell_select_spell;
+	skill->autospell_select_spell_pc = skill_autospell_select_spell_pc;
 	skill->autospell = skill_autospell;
 	skill->calc_heal = skill_calc_heal;
 	skill->check_cloaking = skill_check_cloaking;
