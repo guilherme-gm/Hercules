@@ -17910,6 +17910,7 @@ static int skill_autospell_list(const struct autospell_skill **list)
 {
 	nullpo_retr(0, list);
 
+#ifndef RENEWAL
 	// MUST be sorted by autospell_level (first field)
 	static const struct autospell_skill skills_list[] = {
 		{ 1, MG_NAPALMBEAT,    { 3, 3, 3, 3, 3, 3, 3, 3, 3, 3 } },
@@ -17920,6 +17921,20 @@ static int skill_autospell_list(const struct autospell_skill **list)
 		{ 8, MG_FIREBALL,      { 0, 0, 0, 0, 0, 0, 0, 1, 2, 2 } },
 		{ 10, MG_FROSTDIVER,   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 } },
 	};
+#else
+	// MUST be sorted by autospell_level (first field)
+	static const struct autospell_skill skills_list[] = {
+		{ 1, MG_COLDBOLT },
+		{ 1, MG_FIREBOLT },
+		{ 1, MG_LIGHTNINGBOLT },
+		{ 4, MG_SOULSTRIKE },
+		{ 4, MG_FIREBALL },
+		{ 7, WZ_EARTHSPIKE },
+		{ 7, MG_FROSTDIVER },
+		{ 10, MG_THUNDERSTORM },
+		{ 10, WZ_HEAVENDRIVE },
+	};
+#endif
 	static const int list_len = ARRAYLENGTH(skills_list);
 
 #if PACKETVER_MAIN_NUM < 20181128 && PACKETVER_RE_NUM < 20181031
@@ -18000,7 +18015,18 @@ static void skill_autospell_select_spell(struct block_list *bl, int skill_lv)
 		skill_idx += rnd() % (upper_idx - lower_idx);
 
 	const struct autospell_skill *sk = (skills_list + skill_idx);
-	sc_start4(bl, bl, SC_AUTOSPELL, 100, skill_lv, sk->skill_id, sk->skill_lv[skill_lv - 1], 0,
+	
+	int max_lv;
+#ifndef RENEWAL
+		max_lv = sk->skill_lv[skill_lv - 1]
+#else
+		// @TODO: Is this how AutoSpell works for non-players after rebalance? I made it the same as the player one...
+		max_lv = skill_lv / 2;
+		if (max_lv == 0)
+			max_lv = 1;
+#endif
+
+	sc_start4(bl, bl, SC_AUTOSPELL, 100, skill_lv, sk->skill_id, max_lv, 0,
 		skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
 }
 
@@ -18034,7 +18060,15 @@ static int skill_autospell_spell_selected(struct map_session_data *sd, uint16 sk
 	if (sk->autospell_level > autospell_lv)
 		return 0; // Don't have enough level to use
 
-	int max_lv = sk->skill_lv[autospell_lv - 1];
+	int max_lv;
+#ifndef RENEWAL
+	max_lv = sk->skill_lv[autospell_lv - 1];
+#else
+	max_lv = autospell_lv / 2;
+	if (max_lv == 0)
+		max_lv = 1;
+#endif
+
 	if (sd->sc.data[SC_SOULLINK] != NULL && sd->sc.data[SC_SOULLINK]->val2 == SL_SAGE) {
 		if (skill_id == MG_COLDBOLT || skill_id == MG_FIREBOLT || skill_id == MG_LIGHTNINGBOLT)
 			max_lv = 10; // Soul Linker bonus. [Skotlex]

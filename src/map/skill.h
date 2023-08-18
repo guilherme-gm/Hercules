@@ -1873,7 +1873,9 @@ struct s_skill_db {
 struct autospell_skill {
 	int autospell_level;
 	int skill_id;
+#ifndef RENEWAL
 	int skill_lv[MAX_SKILL_LEVEL];
+#endif
 };
 
 struct s_skill_unit_layout {
