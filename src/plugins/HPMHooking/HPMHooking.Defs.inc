@@ -8466,6 +8466,8 @@ typedef void (*HPMHOOK_pre_skill_identify) (struct map_session_data **sd, int *i
 typedef void (*HPMHOOK_post_skill_identify) (struct map_session_data *sd, int idx);
 typedef void (*HPMHOOK_pre_skill_weaponrefine) (struct map_session_data **sd, int *idx);
 typedef void (*HPMHOOK_post_skill_weaponrefine) (struct map_session_data *sd, int idx);
+typedef void (*HPMHOOK_pre_skill_autospell_select_spell) (struct block_list **src, int *skill_lv);
+typedef void (*HPMHOOK_post_skill_autospell_select_spell) (struct block_list *src, int skill_lv);
 typedef int (*HPMHOOK_pre_skill_autospell) (struct map_session_data **md, uint16 *skill_id);
 typedef int (*HPMHOOK_post_skill_autospell) (int retVal___, struct map_session_data *md, uint16 skill_id);
 typedef int (*HPMHOOK_pre_skill_calc_heal) (struct block_list **src, struct block_list **target, uint16 *skill_id, uint16 *skill_lv, bool *heal);

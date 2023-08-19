@@ -85256,6 +85256,32 @@ void HP_skill_weaponrefine(struct map_session_data *sd, int idx) {
 	}
 	return;
 }
+void HP_skill_autospell_select_spell(struct block_list *src, int skill_lv) {
+	int hIndex = 0;
+	if (HPMHooks.count.HP_skill_autospell_select_spell_pre > 0) {
+		void (*preHookFunc) (struct block_list **src, int *skill_lv);
+		*HPMforce_return = false;
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_select_spell_pre; hIndex++) {
+			preHookFunc = HPMHooks.list.HP_skill_autospell_select_spell_pre[hIndex].func;
+			preHookFunc(&src, &skill_lv);
+		}
+		if (*HPMforce_return) {
+			*HPMforce_return = false;
+			return;
+		}
+	}
+	{
+		HPMHooks.source.skill.autospell_select_spell(src, skill_lv);
+	}
+	if (HPMHooks.count.HP_skill_autospell_select_spell_post > 0) {
+		void (*postHookFunc) (struct block_list *src, int skill_lv);
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_select_spell_post; hIndex++) {
+			postHookFunc = HPMHooks.list.HP_skill_autospell_select_spell_post[hIndex].func;
+			postHookFunc(src, skill_lv);
+		}
+	}
+	return;
+}
 int HP_skill_autospell(struct map_session_data *md, uint16 skill_id) {
 	int hIndex = 0;
 	int retVal___ = 0;
