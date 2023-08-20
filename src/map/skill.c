@@ -17921,6 +17921,22 @@ static int skill_autospell_list(const struct autospell_skill **list)
 		{ 8, MG_FIREBALL,      { 0, 0, 0, 0, 0, 0, 0, 1, 2, 2 } },
 		{ 10, MG_FROSTDIVER,   { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1 } },
 	};
+#elif defined(CLASSIC_AUTOSPELL_LIST)
+	/* Renewal structure/effect with pre-re skill list.
+	 * This is a custom alternative for RENEWAL servers that doesn't support more than 7 skills
+	 * but can't migrate to a newer client right now.
+	 */
+	
+	// MUST be sorted by autospell_level (first field)
+	static const struct autospell_skill skills_list[] = {
+		{ 1, MG_NAPALMBEAT },
+		{ 2, MG_COLDBOLT },
+		{ 2, MG_FIREBOLT },
+		{ 2, MG_LIGHTNINGBOLT },
+		{ 5, MG_SOULSTRIKE },
+		{ 8, MG_FIREBALL },
+		{ 10, MG_FROSTDIVER },
+	};
 #else
 	// MUST be sorted by autospell_level (first field)
 	static const struct autospell_skill skills_list[] = {
@@ -17939,7 +17955,7 @@ static int skill_autospell_list(const struct autospell_skill **list)
 
 #if PACKETVER_MAIN_NUM < 20181128 && PACKETVER_RE_NUM < 20181031
 	STATIC_ASSERT(ARRAYLENGTH(skills_list) <= 7,
-		"Older clients only supports AutoSpell list with up to 7 skills. Customize the list above or update your client.");
+		"Older clients only supports AutoSpell list with up to 7 skills. Customize the list above, update your client or consider using CLASSIC_AUTOSPELL_LIST.");
 #endif
 
 	*list = skills_list;

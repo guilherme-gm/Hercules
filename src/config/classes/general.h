@@ -65,6 +65,17 @@
 //#define DEVOTION_REFLECT_DAMAGE
 
 /**
+ * When enabled, the list of usable skills in Auto Spell (Hindsight) for renewal servers follows
+ * the list from Pre-RE servers.
+ * 
+ * This only applies for the "unlocked" skills. The used level and other effects still follows
+ * Renewal.
+ * 
+ * You may want to enable this if you have a client that can't support the list with more than 7 skills.
+ */
+//#define CLASSIC_AUTOSPELL_LIST
+
+/**
  * No settings past this point
  **/
 
