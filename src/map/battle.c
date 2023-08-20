@@ -1479,7 +1479,7 @@ static int64 battle_calc_defense(int attack_type, struct block_list *src, struct
 				def1 = 0;
 			if (def2 < 1)
 				def2 = 1;
-			
+
 			//Vitality reduction from rodatazone: http://rodatazone.simgaming.net/mechanics/substats.php#def
 			if (tsd) {
 				//Sd vit-eq
@@ -4808,7 +4808,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 			case KN_BOWLINGBASH:
 				wd.div_ = 2;
-				
+
 				// wflag stores the number of affected targets
 				if (sd != NULL && sd->weapontype == W_2HSWORD) {
 					if (wflag >= 2 && wflag < 4)
@@ -6689,14 +6689,19 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 		}
 	}
 
-	if(sd && (skillv = pc->checkskill(sd,MO_TRIPLEATTACK)) > 0) {
-		int triple_rate= 30 - skillv; //Base Rate
-		if (sc && sc->data[SC_SKILLRATE_UP] && sc->data[SC_SKILLRATE_UP]->val1 == MO_TRIPLEATTACK) {
-			triple_rate+= triple_rate*(sc->data[SC_SKILLRATE_UP]->val2)/100;
+	if(sd != NULL && (skillv = pc->checkskill(sd, MO_TRIPLEATTACK)) > 0) {
+#ifndef RENEWAL
+		int triple_rate = 30 - skillv; // Base Rate
+#else
+		int triple_rate = 30; // Base Rate
+#endif
+		if (sc != NULL && sc->data[SC_SKILLRATE_UP] != NULL && sc->data[SC_SKILLRATE_UP]->val1 == MO_TRIPLEATTACK) {
+			triple_rate += triple_rate * (sc->data[SC_SKILLRATE_UP]->val2) / 100;
 			status_change_end(src, SC_SKILLRATE_UP, INVALID_TIMER);
 		}
-		if (rnd()%100 < triple_rate) {
-			if( skill->attack(BF_WEAPON,src,src,target,MO_TRIPLEATTACK,skillv,tick,0) )
+
+		if (rnd() % 100 < triple_rate) {
+			if (skill->attack(BF_WEAPON, src, src, target, MO_TRIPLEATTACK, skillv, tick, 0) != 0)
 				return ATK_DEF;
 			return ATK_MISS;
 		}
