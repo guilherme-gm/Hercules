@@ -6394,8 +6394,8 @@ struct {
 	struct HPMHookPoint *HP_skill_weaponrefine_post;
 	struct HPMHookPoint *HP_skill_autospell_select_spell_pre;
 	struct HPMHookPoint *HP_skill_autospell_select_spell_post;
-	struct HPMHookPoint *HP_skill_autospell_pre;
-	struct HPMHookPoint *HP_skill_autospell_post;
+	struct HPMHookPoint *HP_skill_autospell_spell_selected_pre;
+	struct HPMHookPoint *HP_skill_autospell_spell_selected_post;
 	struct HPMHookPoint *HP_skill_calc_heal_pre;
 	struct HPMHookPoint *HP_skill_calc_heal_post;
 	struct HPMHookPoint *HP_skill_check_cloaking_pre;
@@ -13929,8 +13929,8 @@ struct {
 	int HP_skill_weaponrefine_post;
 	int HP_skill_autospell_select_spell_pre;
 	int HP_skill_autospell_select_spell_post;
-	int HP_skill_autospell_pre;
-	int HP_skill_autospell_post;
+	int HP_skill_autospell_spell_selected_pre;
+	int HP_skill_autospell_spell_selected_post;
 	int HP_skill_calc_heal_pre;
 	int HP_skill_calc_heal_post;
 	int HP_skill_check_cloaking_pre;

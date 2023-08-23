@@ -118,6 +118,14 @@ void force_pc_addskill(struct map_session_data *sd, struct pc_skill *skill_)
 	sd->status.skill[skill->get_index(skill_->skill_id)].lv = skill_->skill_lv;
 }
 
+void force_pc_addskill_list(struct map_session_data *sd, struct pc_skill *skill_list, int len)
+{
+	nullpo_retv(sd);
+
+	for (int i = 0; i < len; i++)
+		force_pc_addskill(sd, (skill_list + i));
+}
+
 void clear_pc(struct map_session_data *sd)
 {
 	sockt->delete_session(sd->fd);

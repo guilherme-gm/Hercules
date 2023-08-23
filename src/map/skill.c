@@ -17844,7 +17844,7 @@ static void skill_autospell_select_spell(struct block_list *src, int skill_lv)
 	}
 }
 
-static int skill_autospell(struct map_session_data *sd, uint16 skill_id)
+static int skill_autospell_spell_selected(struct map_session_data *sd, uint16 skill_id)
 {
 	uint16 skill_lv;
 	int maxlv=1,lv;
@@ -25033,7 +25033,7 @@ void skill_defaults(void)
 	skill->identify = skill_identify;
 	skill->weaponrefine = skill_weaponrefine;
 	skill->autospell_select_spell = skill_autospell_select_spell;
-	skill->autospell = skill_autospell;
+	skill->autospell_spell_selected = skill_autospell_spell_selected;
 	skill->calc_heal = skill_calc_heal;
 	skill->check_cloaking = skill_check_cloaking;
 	skill->check_cloaking_end = skill_check_cloaking_end;
