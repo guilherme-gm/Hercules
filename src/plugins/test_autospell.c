@@ -19,8 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/// Base author: Haru <haru@dotalux.com>
-
 #include "common/hercules.h"
 
 #include "common/random.h"

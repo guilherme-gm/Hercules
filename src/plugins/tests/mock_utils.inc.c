@@ -15,7 +15,11 @@
 #include "map/status.h"
 #include "map/pc.h"
 
+// we may not use all functions in every test, and that's fine
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 // ====================== Socket mocking =====================
+int fd_counter = 100;
 int (*og_socket_wfifoset)(int fd, size_t len, bool validate);
 
 uint8 dummy_buff[1000] = { 0 };
@@ -90,7 +94,7 @@ struct pc_skill {
 struct map_session_data *make_dummy_pc(void)
 {
 	struct map_session_data *sd = pc->get_dummy_sd();
-	sd->fd = 100;
+	sd->fd = fd_counter++;
 	sockt->create_session(sd->fd, null_fn, null_fn, null_fn, null_fn, null_fn);
 	sockt->session[sd->fd]->client_addr = 0;
 	sockt->session[sd->fd]->flag.validate = sockt->validate;
@@ -112,6 +116,12 @@ void force_pc_addskill(struct map_session_data *sd, struct pc_skill *skill_)
 
 	sd->status.skill[skill->get_index(skill_->skill_id)].id = skill_->skill_id;
 	sd->status.skill[skill->get_index(skill_->skill_id)].lv = skill_->skill_lv;
+}
+
+void clear_pc(struct map_session_data *sd)
+{
+	sockt->delete_session(sd->fd);
+	aFree(sd);
 }
 
 
