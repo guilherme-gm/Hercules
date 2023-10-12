@@ -231,53 +231,22 @@ static void rodex_add_item(struct map_session_data *sd, int16 idx, int16 amount)
 		return;
 	}
 
-	bool is_new = true;
-	int i;
+	struct rodex_message *msg = &sd->rodex.tmp;
 
-	// stackable item, try to find it in the current list
-	if (itemdb->isstackable(inv_item->nameid) == 1) {
-		for (i = 0; i < RODEX_MAX_ITEM; ++i) {
-			if (sd->rodex.tmp.items[i].idx == idx
-				&& inv_item->nameid == sd->rodex.tmp.items[i].item.nameid
-				&& inv_item->unique_id == sd->rodex.tmp.items[i].item.unique_id) {
-				is_new = false;
-				break;
-			}
-		}
-	}
-
-	// item is not attached yet, find a new slot
-	if (is_new)
-		i = sd->rodex.tmp.items_count;
-
-	if (i == RODEX_MAX_ITEM) {
-		clif->rodex_add_item_result(sd, idx, amount, RODEX_ADD_ITEM_NO_SPACE);
-		return;
-	}
-
-	struct rodex_item *msg_slot = &sd->rodex.tmp.items[i];
-	if (msg_slot->item.amount + amount > inv_item->amount) {
+	int existing_idx;
+	ARR_FIND(0, msg->items_count, existing_idx, (msg->items[existing_idx].idx == idx));
+	if (existing_idx < msg->items_count && msg->items[existing_idx].item.amount + amount > inv_item->amount) {
+		// Trying to add more than they have in inventory
 		clif->rodex_add_item_result(sd, idx, amount, RODEX_ADD_ITEM_FATAL_ERROR);
 		return;
 	}
 
-	if (sd->rodex.tmp.weight + sd->inventory_data[idx]->weight * amount > RODEX_WEIGHT_LIMIT) {
-		clif->rodex_add_item_result(sd, idx, amount, RODEX_ADD_ITEM_FATAL_ERROR);
-		return;
-	}
+	// copy item data into a new variable so we can change the amount
+	struct item it = *inv_item;
+	it.amount = amount;
 
-	msg_slot->idx = idx;
-	sd->rodex.tmp.weight += sd->inventory_data[idx]->weight * amount;
-	if (is_new) {
-		msg_slot->item = sd->status.inventory[idx];
-		msg_slot->item.amount = amount;
-		sd->rodex.tmp.items_count++;
-	} else {
-		msg_slot->item.amount += amount;
-	}
-	sd->rodex.tmp.type |= MAIL_TYPE_ITEM;
-
-	clif->rodex_add_item_result(sd, idx, amount, RODEX_ADD_ITEM_SUCCESS);
+	enum rodex_add_item result = rodex->mail_try_add_item(&sd->rodex.tmp, idx, &it);
+	clif->rodex_add_item_result(sd, idx, amount, result);
 }
 
 /// Removes an item attached to a message being writen
