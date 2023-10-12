@@ -54,6 +54,138 @@ static bool rodex_isenabled(void)
 	return false;
 }
 
+/**
+ * Initializes a rodex message structure with default settings and sender information.
+ *
+ * @param msg message container
+ * @param sender_id character id authoring the message (use RODEX_NPC_SENDER for NPC-generated messages)
+ * @param sender_name display name of message sender/author
+ */
+static void rodex_mail_init(struct rodex_message *msg, int sender_id, const char *sender_name)
+{
+	nullpo_retv(msg);
+	nullpo_retv(sender_name);
+
+	memset(msg, 0, sizeof(*msg));
+	msg->send_date = (int) time(NULL);
+	msg->expire_date = (int) time(NULL) + RODEX_EXPIRE;
+
+	msg->type = MAIL_TYPE_TEXT;
+
+	msg->sender_id = sender_id;
+	safestrncpy(msg->sender_name, sender_name, sizeof(msg->sender_name));
+
+	if (sender_id == RODEX_NPC_SENDER)
+		msg->type |= MAIL_TYPE_NPC;
+}
+
+/**
+ * Attempts to add an item to a RoDEX message
+ *
+ * @remark
+ *    This function does not perform player-specific checks (like trade check, inventory, etc)
+ *
+ * @param msg message container
+ * @param inventory_idx inventory index (if coming from a player, -1 if not from a player)
+ * @param it item to add
+ * @return true if it was added, false otherwise
+ */
+static enum rodex_add_item rodex_mail_try_add_item(struct rodex_message *msg, int inventory_idx, struct item *it)
+{
+	nullpo_retr(RODEX_ADD_ITEM_FATAL_ERROR, msg);
+	nullpo_retr(RODEX_ADD_ITEM_FATAL_ERROR, it);
+	Assert_retr(RODEX_ADD_ITEM_FATAL_ERROR, it->amount > 0 && it->amount <= MAX_AMOUNT);
+
+	struct item_data *itd = itemdb->search(it->nameid);
+
+	int weight_gain = it->amount * itd->weight;
+
+	if (msg->weight + weight_gain > RODEX_WEIGHT_LIMIT)
+		return RODEX_ADD_ITEM_WEIGHT_ERROR; // @TODO: Or RODEX_ADD_ITEM_FATAL_ERROR ?
+
+	// Check for existing stacks to add to them
+	if (itemdb->isstackable2(itd) == 1) {
+		int item_idx;
+		ARR_FIND(0, msg->items_count, item_idx, (
+			msg->items[item_idx].idx == inventory_idx
+			&& msg->items[item_idx].item.nameid == it->nameid
+			&& msg->items[item_idx].item.unique_id == it->unique_id
+		));
+
+		if (item_idx < msg->items_count) {
+			if (msg->items[item_idx].item.amount + it->amount > MAX_AMOUNT)
+				return RODEX_ADD_ITEM_FATAL_ERROR;
+
+			msg->items[item_idx].item.amount += it->amount;
+			msg->weight += weight_gain;
+			return RODEX_ADD_ITEM_SUCCESS;
+		}
+	}
+
+	if (msg->items_count == RODEX_MAX_ITEM)
+		return RODEX_ADD_ITEM_NO_SPACE;
+
+	msg->items[msg->items_count].item = *it;
+	msg->items[msg->items_count].idx = inventory_idx;
+	msg->items_count++;
+
+	msg->weight += weight_gain;
+	msg->type |= MAIL_TYPE_ITEM;
+
+	return RODEX_ADD_ITEM_SUCCESS;
+}
+
+static bool rodex_mail_try_add_zeny(struct rodex_message *msg, int amount)
+{
+	nullpo_retr(false, msg);
+
+	// check for overflow only?
+	if (msg->items_count == RODEX_MAX_ITEM || amount == 0)
+		return false;
+
+	if (amount < 0 && msg->zeny < (-1 * amount)) {
+		ShowWarning("%s: Trying to remove more zeny from a message than it had. Zeroing message zeny. (amount: %d / current: %ld)\n", __func__, amount, msg->zeny);
+		amount = -1 * msg->zeny;
+	}
+
+	msg->zeny += amount;
+
+	if (msg->zeny > 0)
+		msg->type |= MAIL_TYPE_ZENY;
+	else
+		msg->type &= ~MAIL_TYPE_ZENY;
+
+	return true;
+}
+
+static void rodex_mail_clear_attachments(struct rodex_message *msg)
+{
+	nullpo_retv(msg);
+
+	msg->zeny = 0;
+	msg->items_count = 0;
+	// memset(msg->items, 0, sizeof(msg->items));
+
+	msg->type &= ~(MAIL_TYPE_ITEM | MAIL_TYPE_ZENY);
+}
+
+static void rodex_mail_send(struct rodex_message *msg, int receiver_id, bool account_mail)
+{
+	// clear possibly-garbage item
+	if (msg->items_count < RODEX_MAX_ITEM) {
+		int empty_spaces = RODEX_MAX_ITEM - msg->items_count;
+		memset((msg->items + msg->items_count), 0, sizeof(msg->items[0]) * empty_spaces);
+	}
+
+	if (account_mail) {
+		msg->opentype = RODEX_OPENTYPE_ACCOUNT;
+		msg->receiver_accountid = receiver_id;
+	} else {
+		msg->opentype = RODEX_OPENTYPE_MAIL;
+		msg->receiver_id = receiver_id;
+	}
+}
+
 /// Checks and refreshes the user daily number of Stamps
 /// @param sd : The player who's being checked
 static void rodex_refresh_stamps(struct map_session_data *sd)
@@ -704,10 +836,19 @@ void rodex_defaults(void)
 	rodex->init = do_init_rodex;
 	rodex->final = do_final_rodex;
 
+	rodex->isenabled = rodex_isenabled;
+
+	/** message creation utilities */
+	rodex->mail_init = rodex_mail_init;
+	rodex->mail_try_add_item = rodex_mail_try_add_item;
+	rodex->mail_try_add_zeny = rodex_mail_try_add_zeny;
+	rodex->mail_clear_attachments = rodex_mail_clear_attachments;
+	rodex->mail_send = rodex_mail_send;
+
+	/** player-related interface */
 	rodex->open = rodex_open;
 	rodex->next_page = rodex_next_page;
 	rodex->refresh = rodex_refresh;
-	rodex->isenabled = rodex_isenabled;
 	rodex->add_item = rodex_add_item;
 	rodex->remove_item = rodex_remove_item;
 	rodex->check_player = rodex_check_player;
