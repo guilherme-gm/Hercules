@@ -590,6 +590,7 @@ struct Battle_Config {
 	int skill_enabled_npc;
 
 	int feature_enable_achievement;
+	int feature_rodex_achievement_reward;
 
 	int ping_timer_interval;
 	int ping_time;
