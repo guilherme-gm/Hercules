@@ -1093,7 +1093,7 @@ enum fame_list_type {
 
 struct rodex_item {
 	struct item item;
-	// inventory idx when composing a message (-1 if not filled)
+	// inventory idx when composing a message
 	int idx;
 };
 
