@@ -7804,6 +7804,7 @@ static const struct config_data_old battle_data[] = {
 	{ "magicrod_type",                      &battle_config.magicrod_type,                   0,      0,      1,              },
 	{ "skill_enabled_npc",                  &battle_config.skill_enabled_npc,               0,      0,      INT_MAX,        },
 	{ "features/enable_achievement_system", &battle_config.feature_enable_achievement,      1,      0,      1,              },
+	{ "features/rodex_achievement_reward",  &battle_config.feature_rodex_achievement_reward,1,      0,      1,              },
 	{ "ping_timer_inverval",                &battle_config.ping_timer_interval,             30,     0,      99999999,       },
 	{ "ping_time",                          &battle_config.ping_time,                       20,     0,      99999999,       },
 	{ "option_drop_max_loop",               &battle_config.option_drop_max_loop,            10,     1,      100000,         },
@@ -7996,6 +7997,11 @@ static void battle_adjust_conf(void)
 		battle_config.feature_goldpc_enable = 0;
 	}
 #endif
+
+	if (battle_config.feature_rodex_achievement_reward == 1 && battle_config.feature_rodex == 0) {
+		ShowWarning("conf/map/battle/feature.conf rodex_achievement_reward is enabled but rodex system is not, disabling...\n");
+		battle_config.feature_rodex_achievement_reward = 0;
+	}
 
 #ifndef CELL_NOSTACK
 	if (battle_config.custom_cell_stack_limit != 1)
