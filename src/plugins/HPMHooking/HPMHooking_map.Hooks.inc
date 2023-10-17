@@ -2752,6 +2752,33 @@ enum damage_lv HP_battle_weapon_attack(struct block_list *bl, struct block_list 
 	}
 	return retVal___;
 }
+bool HP_battle_should_bladestop_attacker(struct block_list *src, struct block_list *target) {
+	int hIndex = 0;
+	bool retVal___ = false;
+	if (HPMHooks.count.HP_battle_should_bladestop_attacker_pre > 0) {
+		bool (*preHookFunc) (struct block_list **src, struct block_list **target);
+		*HPMforce_return = false;
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_battle_should_bladestop_attacker_pre; hIndex++) {
+			preHookFunc = HPMHooks.list.HP_battle_should_bladestop_attacker_pre[hIndex].func;
+			retVal___ = preHookFunc(&src, &target);
+		}
+		if (*HPMforce_return) {
+			*HPMforce_return = false;
+			return retVal___;
+		}
+	}
+	{
+		retVal___ = HPMHooks.source.battle.should_bladestop_attacker(src, target);
+	}
+	if (HPMHooks.count.HP_battle_should_bladestop_attacker_post > 0) {
+		bool (*postHookFunc) (bool retVal___, struct block_list *src, struct block_list *target);
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_battle_should_bladestop_attacker_post; hIndex++) {
+			postHookFunc = HPMHooks.list.HP_battle_should_bladestop_attacker_post[hIndex].func;
+			retVal___ = postHookFunc(retVal___, src, target);
+		}
+	}
+	return retVal___;
+}
 bool HP_battle_check_arrows(struct map_session_data *sd) {
 	int hIndex = 0;
 	bool retVal___ = false;
@@ -85256,14 +85283,40 @@ void HP_skill_weaponrefine(struct map_session_data *sd, int idx) {
 	}
 	return;
 }
-int HP_skill_autospell(struct map_session_data *md, uint16 skill_id) {
+void HP_skill_autospell_select_spell(struct block_list *src, int skill_lv) {
+	int hIndex = 0;
+	if (HPMHooks.count.HP_skill_autospell_select_spell_pre > 0) {
+		void (*preHookFunc) (struct block_list **src, int *skill_lv);
+		*HPMforce_return = false;
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_select_spell_pre; hIndex++) {
+			preHookFunc = HPMHooks.list.HP_skill_autospell_select_spell_pre[hIndex].func;
+			preHookFunc(&src, &skill_lv);
+		}
+		if (*HPMforce_return) {
+			*HPMforce_return = false;
+			return;
+		}
+	}
+	{
+		HPMHooks.source.skill.autospell_select_spell(src, skill_lv);
+	}
+	if (HPMHooks.count.HP_skill_autospell_select_spell_post > 0) {
+		void (*postHookFunc) (struct block_list *src, int skill_lv);
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_select_spell_post; hIndex++) {
+			postHookFunc = HPMHooks.list.HP_skill_autospell_select_spell_post[hIndex].func;
+			postHookFunc(src, skill_lv);
+		}
+	}
+	return;
+}
+int HP_skill_autospell_spell_selected(struct map_session_data *md, uint16 skill_id) {
 	int hIndex = 0;
 	int retVal___ = 0;
-	if (HPMHooks.count.HP_skill_autospell_pre > 0) {
+	if (HPMHooks.count.HP_skill_autospell_spell_selected_pre > 0) {
 		int (*preHookFunc) (struct map_session_data **md, uint16 *skill_id);
 		*HPMforce_return = false;
-		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_pre; hIndex++) {
-			preHookFunc = HPMHooks.list.HP_skill_autospell_pre[hIndex].func;
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_spell_selected_pre; hIndex++) {
+			preHookFunc = HPMHooks.list.HP_skill_autospell_spell_selected_pre[hIndex].func;
 			retVal___ = preHookFunc(&md, &skill_id);
 		}
 		if (*HPMforce_return) {
@@ -85272,12 +85325,12 @@ int HP_skill_autospell(struct map_session_data *md, uint16 skill_id) {
 		}
 	}
 	{
-		retVal___ = HPMHooks.source.skill.autospell(md, skill_id);
+		retVal___ = HPMHooks.source.skill.autospell_spell_selected(md, skill_id);
 	}
-	if (HPMHooks.count.HP_skill_autospell_post > 0) {
+	if (HPMHooks.count.HP_skill_autospell_spell_selected_post > 0) {
 		int (*postHookFunc) (int retVal___, struct map_session_data *md, uint16 skill_id);
-		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_post; hIndex++) {
-			postHookFunc = HPMHooks.list.HP_skill_autospell_post[hIndex].func;
+		for (hIndex = 0; hIndex < HPMHooks.count.HP_skill_autospell_spell_selected_post; hIndex++) {
+			postHookFunc = HPMHooks.list.HP_skill_autospell_spell_selected_post[hIndex].func;
 			retVal___ = postHookFunc(retVal___, md, skill_id);
 		}
 	}

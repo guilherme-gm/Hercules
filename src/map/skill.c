@@ -8777,42 +8777,7 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 		case SA_AUTOSPELL:
 			clif->skill_nodamage(src,bl,skill_id,skill_lv,1);
-			if(sd){
-				sd->state.workinprogress = 3;
-				clif->autospell(sd,skill_lv);
-			}else {
-				int maxlv=1,spellid=0;
-				static const int spellarray[3] = { MG_COLDBOLT,MG_FIREBOLT,MG_LIGHTNINGBOLT };
-				if(skill_lv >= 10) {
-					spellid = MG_FROSTDIVER;
-#if 0
-					if (tsc && tsc->data[SC_SOULLINK] && tsc->data[SC_SOULLINK]->val2 == SA_SAGE)
-						maxlv = 10;
-					else
-#endif // 0
-						maxlv = skill_lv - 9;
-				}
-				else if(skill_lv >=8) {
-					spellid = MG_FIREBALL;
-					maxlv = skill_lv - 7;
-				}
-				else if(skill_lv >=5) {
-					spellid = MG_SOULSTRIKE;
-					maxlv = skill_lv - 4;
-				}
-				else if(skill_lv >=2) {
-					int i = rnd() % ARRAYLENGTH(spellarray);
-					spellid = spellarray[i];
-					maxlv = skill_lv - 1;
-				}
-				else if(skill_lv > 0) {
-					spellid = MG_NAPALMBEAT;
-					maxlv = 3;
-				}
-				if(spellid > 0)
-					sc_start4(src,src,SC_AUTOSPELL,100,skill_lv,spellid,maxlv,0,
-						skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
-			}
+			skill->autospell_select_spell(src, skill_lv);
 			break;
 
 		case BS_GREED:
@@ -17836,7 +17801,50 @@ static void skill_weaponrefine(struct map_session_data *sd, int idx)
 /*==========================================
  *
  *------------------------------------------*/
-static int skill_autospell(struct map_session_data *sd, uint16 skill_id)
+static void skill_autospell_select_spell(struct block_list *src, int skill_lv)
+{
+	nullpo_retv(src);
+	struct map_session_data *sd = BL_CAST(BL_PC, src);
+
+	if(sd){
+		sd->state.workinprogress = 3;
+		clif->autospell(sd,skill_lv);
+	} else {
+		int maxlv=1,spellid=0;
+		static const int spellarray[3] = { MG_COLDBOLT,MG_FIREBOLT,MG_LIGHTNINGBOLT };
+		if(skill_lv >= 10) {
+			spellid = MG_FROSTDIVER;
+#if 0
+			if (tsc && tsc->data[SC_SOULLINK] && tsc->data[SC_SOULLINK]->val2 == SA_SAGE)
+				maxlv = 10;
+			else
+#endif // 0
+				maxlv = skill_lv - 9;
+		}
+		else if(skill_lv >=8) {
+			spellid = MG_FIREBALL;
+			maxlv = skill_lv - 7;
+		}
+		else if(skill_lv >=5) {
+			spellid = MG_SOULSTRIKE;
+			maxlv = skill_lv - 4;
+		}
+		else if(skill_lv >=2) {
+			int i = rnd() % ARRAYLENGTH(spellarray);
+			spellid = spellarray[i];
+			maxlv = skill_lv - 1;
+		}
+		else if(skill_lv > 0) {
+			spellid = MG_NAPALMBEAT;
+			maxlv = 3;
+		}
+		if(spellid > 0)
+			sc_start4(src,src,SC_AUTOSPELL,100,skill_lv,spellid,maxlv,0,
+				skill->get_time(SA_AUTOSPELL, skill_lv), SA_AUTOSPELL);
+	}
+}
+
+static int skill_autospell_spell_selected(struct map_session_data *sd, uint16 skill_id)
 {
 	uint16 skill_lv;
 	int maxlv=1,lv;
@@ -25024,7 +25032,8 @@ void skill_defaults(void)
 	skill->repairweapon = skill_repairweapon;
 	skill->identify = skill_identify;
 	skill->weaponrefine = skill_weaponrefine;
-	skill->autospell = skill_autospell;
+	skill->autospell_select_spell = skill_autospell_select_spell;
+	skill->autospell_spell_selected = skill_autospell_spell_selected;
 	skill->calc_heal = skill_calc_heal;
 	skill->check_cloaking = skill_check_cloaking;
 	skill->check_cloaking_end = skill_check_cloaking_end;

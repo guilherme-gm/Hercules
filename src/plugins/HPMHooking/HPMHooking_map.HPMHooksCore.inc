@@ -228,6 +228,8 @@ struct {
 	struct HPMHookPoint *HP_battle_calc_bg_damage_post;
 	struct HPMHookPoint *HP_battle_weapon_attack_pre;
 	struct HPMHookPoint *HP_battle_weapon_attack_post;
+	struct HPMHookPoint *HP_battle_should_bladestop_attacker_pre;
+	struct HPMHookPoint *HP_battle_should_bladestop_attacker_post;
 	struct HPMHookPoint *HP_battle_check_arrows_pre;
 	struct HPMHookPoint *HP_battle_check_arrows_post;
 	struct HPMHookPoint *HP_battle_calc_weapon_attack_pre;
@@ -6390,8 +6392,10 @@ struct {
 	struct HPMHookPoint *HP_skill_identify_post;
 	struct HPMHookPoint *HP_skill_weaponrefine_pre;
 	struct HPMHookPoint *HP_skill_weaponrefine_post;
-	struct HPMHookPoint *HP_skill_autospell_pre;
-	struct HPMHookPoint *HP_skill_autospell_post;
+	struct HPMHookPoint *HP_skill_autospell_select_spell_pre;
+	struct HPMHookPoint *HP_skill_autospell_select_spell_post;
+	struct HPMHookPoint *HP_skill_autospell_spell_selected_pre;
+	struct HPMHookPoint *HP_skill_autospell_spell_selected_post;
 	struct HPMHookPoint *HP_skill_calc_heal_pre;
 	struct HPMHookPoint *HP_skill_calc_heal_post;
 	struct HPMHookPoint *HP_skill_check_cloaking_pre;
@@ -7759,6 +7763,8 @@ struct {
 	int HP_battle_calc_bg_damage_post;
 	int HP_battle_weapon_attack_pre;
 	int HP_battle_weapon_attack_post;
+	int HP_battle_should_bladestop_attacker_pre;
+	int HP_battle_should_bladestop_attacker_post;
 	int HP_battle_check_arrows_pre;
 	int HP_battle_check_arrows_post;
 	int HP_battle_calc_weapon_attack_pre;
@@ -13921,8 +13927,10 @@ struct {
 	int HP_skill_identify_post;
 	int HP_skill_weaponrefine_pre;
 	int HP_skill_weaponrefine_post;
-	int HP_skill_autospell_pre;
-	int HP_skill_autospell_post;
+	int HP_skill_autospell_select_spell_pre;
+	int HP_skill_autospell_select_spell_post;
+	int HP_skill_autospell_spell_selected_pre;
+	int HP_skill_autospell_spell_selected_post;
 	int HP_skill_calc_heal_pre;
 	int HP_skill_calc_heal_post;
 	int HP_skill_check_cloaking_pre;
