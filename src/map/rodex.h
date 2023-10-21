@@ -25,6 +25,11 @@
 
 #define RODEX_WEIGHT_LIMIT (2000 * 10)
 
+/**
+ * Sender ID for NPC messages
+ */
+#define RODEX_NPC_SENDER 0
+
 struct rodex_message;
 
 enum rodex_add_item {
@@ -60,6 +65,15 @@ struct rodex_interface {
 	void (*final) (void);
 
 	bool (*isenabled) (void);
+
+	/** message creation utilities */
+	void (*mail_init) (struct rodex_message *msg, int sender_id, const char *sender_name);
+	enum rodex_add_item (*mail_try_add_item) (struct rodex_message *msg, int idx, struct item *it);
+	bool (*mail_try_add_zeny) (struct rodex_message *msg, int amount);
+	void (*mail_clear_attachments) (struct rodex_message *msg);
+	void (*mail_send) (struct rodex_message *msg, int receiver_id, bool account_mail);
+
+	/** player-related interface */
 	void (*open) (struct map_session_data *sd, int8 open_type, int64 first_mail_id);
 	void (*next_page) (struct map_session_data *sd, int8 open_type, int64 last_mail_id);
 	void (*refresh) (struct map_session_data *sd, int8 open_type, int64 first_mail_id);

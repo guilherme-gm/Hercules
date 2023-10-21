@@ -325,7 +325,7 @@ static int64 inter_rodex_savemessage(struct rodex_message *msg)
 
 	msg->id = (int64)SQL->LastInsertId(inter->sql_handle);
 
-	for (i = 0; i < RODEX_MAX_ITEM; ++i) {
+	for (i = 0; i < msg->items_count; ++i) {
 		// Should we use statement here? [KIRIEZ]
 		struct item *it = &msg->items[i].item;
 		if (it->nameid == 0)
