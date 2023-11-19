@@ -2,7 +2,7 @@
  * This file is part of Hercules.
  * http://herc.ws - http://github.com/HerculesWS/Hercules
  *
- * Copyright (C) 2013-2023 Hercules Dev Team
+ * Copyright (C) 2013-2024 Hercules Dev Team
  *
  * Hercules is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -8518,6 +8518,8 @@ typedef void (*HPMHOOK_pre_skill_castend_type) (enum cast_enum *type, struct blo
 typedef void (*HPMHOOK_post_skill_castend_type) (enum cast_enum type, struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag);
 typedef int (*HPMHOOK_pre_skill_castend_nodamage_id) (struct block_list **src, struct block_list **bl, uint16 *skill_id, uint16 *skill_lv, int64 *tick, int *flag);
 typedef int (*HPMHOOK_post_skill_castend_nodamage_id) (int retVal___, struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag);
+typedef void (*HPMHOOK_pre_skill_castend_nodamage_id_sc_song) (struct block_list **src, struct block_list **bl, uint16 *skill_id, uint16 *skill_lv, int64 *tick, int *flag);
+typedef void (*HPMHOOK_post_skill_castend_nodamage_id_sc_song) (struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag);
 typedef int (*HPMHOOK_pre_skill_castend_damage_id) (struct block_list **src, struct block_list **bl, uint16 *skill_id, uint16 *skill_lv, int64 *tick, int *flag);
 typedef int (*HPMHOOK_post_skill_castend_damage_id) (int retVal___, struct block_list *src, struct block_list *bl, uint16 skill_id, uint16 skill_lv, int64 tick, int flag);
 typedef int (*HPMHOOK_pre_skill_castend_pos2) (struct block_list **src, int *x, int *y, uint16 *skill_id, uint16 *skill_lv, int64 *tick, int *flag);
@@ -9190,6 +9192,8 @@ typedef short (*HPMHOOK_pre_status_calc_mdef2) (struct block_list **bl, struct s
 typedef short (*HPMHOOK_post_status_calc_mdef2) (short retVal___, struct block_list *bl, struct status_change *sc, int mdef2, bool viewable);
 typedef int (*HPMHOOK_pre_status_calc_batk) (struct block_list **bl, struct status_change **sc, int *batk, bool *viewable);
 typedef int (*HPMHOOK_post_status_calc_batk) (int retVal___, struct block_list *bl, struct status_change *sc, int batk, bool viewable);
+typedef int (*HPMHOOK_pre_status_calc_buff_extra_batk) (struct block_list **bl, struct status_change **sc);
+typedef int (*HPMHOOK_post_status_calc_buff_extra_batk) (int retVal___, struct block_list *bl, struct status_change *sc);
 typedef int (*HPMHOOK_pre_status_base_matk) (struct block_list **bl, const struct status_data **st, int *level);
 typedef int (*HPMHOOK_post_status_base_matk) (int retVal___, struct block_list *bl, const struct status_data *st, int level);
 typedef int (*HPMHOOK_pre_status_get_weapon_atk) (struct block_list **src, struct weapon_atk **watk, int *flag);
