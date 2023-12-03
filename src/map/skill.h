@@ -143,13 +143,14 @@ enum e_skill_inf2 {
 	INF2_HIDDEN_TRAP        = 0x00080000, ///< Traps that are hidden (based on trap_visiblity battle conf)
 	INF2_IS_COMBO_SKILL     = 0x00100000, ///< Sets whether a skill can be used in combos or not
 	INF2_NO_STASIS          = 0x00200000,
-	INF2_NO_KAGEHUMI        = 0x00400000, 
+	INF2_NO_KAGEHUMI        = 0x00400000,
 	INF2_RANGE_VULTURE      = 0x00800000, ///< Range is modified by AC_VULTURE
 	INF2_RANGE_SNAKEEYE     = 0x01000000, ///< Range is modified by GS_SNAKEEYE
 	INF2_RANGE_SHADOWJUMP   = 0x02000000, ///< Range is modified by NJ_SHADOWJUMP
 	INF2_RANGE_RADIUS       = 0x04000000, ///< Range is modified by WL_RADIUS
 	INF2_RANGE_RESEARCHTRAP = 0x08000000, ///< Range is modified by RA_RESEARCHTRAP
 	INF2_ALLOW_PLAGIARIZE   = 0x10000000, ///< Allow skill to be copied via RG_PLAGIARISM[KeiKun]
+	INF2_CUSTOM_SKILL_RATIO = 0x20000000, ///< Skill Ratio uses a custom formula and not the db value as is
 };
 
 

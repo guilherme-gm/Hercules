@@ -917,6 +917,107 @@ static int skill_get_unit_range(int skill_id, int skill_lv)
 	return skill->dbs->db[idx].unit_range[skill_get_lvl_idx(skill_lv)];
 }
 
+struct DBMap *skillratio_formula_db; // int skill_id -> skillratio_fn
+
+static int skill_soulstrike_skillratio(int attack_type, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, int flag)
+{
+	nullpo_ret(target);
+
+	struct status_data *tst = status->get_status_data(target);
+
+	if (battle->check_undead(tst->race, tst->def_ele))
+		return skill_get_ratio(skill_id, skill_lv);
+
+	return 100;
+}
+
+static int skill_holylight_skillratio(int attack_type, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, int flag)
+{
+	struct status_change *sc;
+	struct map_session_data *sd;
+
+	nullpo_ret(src);
+	// nullpo_ret(target);
+
+	sd = BL_CAST(BL_PC, src);
+	sc = status->get_sc(src);
+
+	int skillratio = skill_get_ratio(skill_id, skill_lv)
+	if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
+		skillratio *= 5; // or could be SkillData
+
+	return skillratio;
+
+}
+
+// Common for NJ_KOUENKA, NJ_KAENSIN, NJ_BAKUENRYU
+// SkillData1 provides the boost
+static int skill_ninja_firecharm_boost_skillratio(int attack_type, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, int flag)
+{
+	struct status_change *sc;
+	struct map_session_data *sd;
+
+	nullpo_ret(src);
+	// nullpo_ret(target);
+
+	sd = BL_CAST(BL_PC, src);
+	sc = status->get_sc(src);
+
+	int skillratio = skill_get_ratio(skill_id, skill_lv)
+	if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
+		skillratio += skill_get_time(skill_id, skill_lv) * sd->charm_count;
+
+	return skillratio;
+
+}
+
+static int skill_rayofgenesis_skillratio(int attack_type, struct block_list *src, struct block_list *target, uint16 skill_id, uint16 skill_lv, int flag)
+{
+	struct status_change *sc;
+	struct map_session_data *sd;
+
+	nullpo_ret(src);
+	// nullpo_ret(target);
+
+	sd = BL_CAST(BL_PC, src);
+	sc = status->get_sc(src);
+
+	int skillratio;
+	if (attack_type == BF_MAGIC) {
+		uint16 lv = skill_lv;
+		int bandingBonus = 0;
+
+		if (sc != NULL && sc->data[SC_BANDING] != NULL) {
+			if (sd != NULL) {
+				bandingBonus = 200 * skill->check_pc_partner(sd,skill_id,&lv,skill->get_splash(skill_id,skill_lv), 0);
+			} else {
+				bandingBonus = 200;
+			}
+		}
+
+		int jobBonus = (sd ? sd->status.job_level : 1);
+
+		skillratio = (skill_get_time2(skill_id, skill_lv) + bandingBonus) * jobBonus / 25;
+	} else if (attack_type == BF_WEAPON) {
+		skillratio = skill_get_ratio(skill_id, skill_lv); // 300 + 300 * skill_lv;
+		RE_LVL_DMOD(skill_get_modifier(skill_id)); // 100
+	}
+
+	return skillratio;
+}
+
+static void skill_setup_skillratio_db()
+{
+	skillratio_formula_db = idb_alloc(DB_OPT_BASE);
+
+	idb_put(skillratio_formula_db, MG_SOULSTRIKE, skill_soulstrike_skillratio);
+	idb_put(skillratio_formula_db, AL_HOLYLIGHT, skill_holylight_skillratio);
+	idb_put(skillratio_formula_db, NJ_KOUENKA, skill_ninja_firecharm_boost_skillratio);
+	idb_put(skillratio_formula_db, NJ_KAENSIN, skill_ninja_firecharm_boost_skillratio);
+	idb_put(skillratio_formula_db, NJ_BAKUENRYU, skill_ninja_firecharm_boost_skillratio);
+	idb_put(skillratio_formula_db, LG_RAYOFGENESIS, skill_rayofgenesis_skillratio);
+}
+
 /**
  * Gets a skill's unit target by its ID and level.
  *

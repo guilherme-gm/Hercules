@@ -1628,23 +1628,23 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 	switch(attack_type){
 		case BF_MAGIC:
 			switch(skill_id){
-				case MG_NAPALMBEAT:
-					skillratio += skill_lv * 10 - 30;
-					break;
-				case MG_FIREBALL:
-			#ifdef RENEWAL
-					skillratio += 20 * skill_lv;
-			#else
-					skillratio += skill_lv * 10 - 30;
-			#endif
-					break;
-				case MG_SOULSTRIKE:
-					if (battle->check_undead(tst->race,tst->def_ele))
-						skillratio += 5*skill_lv;
-					break;
-				case MG_FIREWALL:
-					skillratio -= 50;
-					break;
+				// case MG_NAPALMBEAT:
+				// 	skillratio += skill_lv * 10 - 30;
+				// 	break;
+			// 	case MG_FIREBALL:
+			// #ifdef RENEWAL
+			// 		skillratio += 20 * skill_lv;
+			// #else
+			// 		skillratio += skill_lv * 10 - 30;
+			// #endif
+			// 		break;
+				// case MG_SOULSTRIKE:
+				// 	if (battle->check_undead(tst->race,tst->def_ele))
+				// 		skillratio += 5*skill_lv;
+				// 	break;
+				// case MG_FIREWALL:
+				// 	skillratio -= 50;
+				// 	break;
 				case MG_THUNDERSTORM:
 					/**
 					 * in Renewal Thunder Storm boost is 100% (in pre-re, 80%)
@@ -1656,11 +1656,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case MG_FROSTDIVER:
 					skillratio += 10 * skill_lv;
 					break;
-				case AL_HOLYLIGHT:
-					skillratio += 25;
-					if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
-						skillratio *= 5; //Does 5x damage include bonuses from other skills?
-					break;
+				// case AL_HOLYLIGHT:
+				// 	skillratio += 25;
+				// 	if (sc && sc->data[SC_SOULLINK] && sc->data[SC_SOULLINK]->val2 == SL_PRIEST)
+				// 		skillratio *= 5; //Does 5x damage include bonuses from other skills?
+				// 	break;
 				case AL_RUWACH:
 					skillratio += 45;
 					break;
@@ -1694,21 +1694,21 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case SL_SMA:
 					skillratio += -60 + status->get_lv(src); //Base damage is 40% + lv%
 					break;
-				case NJ_KOUENKA:
-					skillratio -= 10;
-					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
-						skillratio += 20 * sd->charm_count;
-					break;
-				case NJ_KAENSIN:
-					skillratio -= 50;
-					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
-						skillratio += 10 * sd->charm_count;
-					break;
-				case NJ_BAKUENRYU:
-					skillratio += 50 * (skill_lv - 1);
-					if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
-						skillratio += 15 * sd->charm_count;
-					break;
+				// case NJ_KOUENKA:
+				// 	skillratio -= 10;
+				// 	if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
+				// 		skillratio += 20 * sd->charm_count;
+				// 	break;
+				// case NJ_KAENSIN:
+				// 	skillratio -= 50;
+				// 	if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
+				// 		skillratio += 10 * sd->charm_count;
+				// 	break;
+				// case NJ_BAKUENRYU:
+				// 	skillratio += 50 * (skill_lv - 1);
+				// 	if (sd && sd->charm_type == CHARM_TYPE_FIRE && sd->charm_count > 0)
+				// 		skillratio += 15 * sd->charm_count;
+				// 	break;
 #ifdef RENEWAL
 				case NJ_HYOUSENSOU:
 					skillratio -= 30;
@@ -1802,14 +1802,15 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				/**
 					* Warlock
 					**/
+				// This could become a generic "int boosted" that uses a SkillData, or a specific function
 				case WL_SOULEXPANSION: // MATK [{( Skill Level + 4 ) x 100 ) + ( Caster's INT )} x ( Caster's Base Level / 100 )] %
 					skillratio = 100 * (skill_lv + 4) + st->int_;
 					RE_LVL_DMOD(100);
 					break;
-				case WL_FROSTMISTY: // MATK [{( Skill Level x 100 ) + 200 } x ( Caster's Base Level / 100 )] %
-					skillratio += 100 + 100 * skill_lv;
-					RE_LVL_DMOD(100);
-					break;
+				// case WL_FROSTMISTY: // MATK [{( Skill Level x 100 ) + 200 } x ( Caster's Base Level / 100 )] %
+				// 	skillratio += 100 + 100 * skill_lv;
+				// 	RE_LVL_DMOD(100);
+				// 	break;
 				case WL_JACKFROST:
 					if( tsc && tsc->data[SC_FROSTMISTY] ){
 						skillratio += 900 + 300 * skill_lv;
