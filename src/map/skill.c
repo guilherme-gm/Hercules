@@ -15569,10 +15569,6 @@ static int skill_check_condition_castbegin(struct map_session_data *sd, uint16 s
 					default:
 						return 0;
 				}
-			} else if (!unit->can_move(&sd->bl)) {
-				//Placed here as ST_MOVE_ENABLE should not apply if rooted or on a combo. [Skotlex]
-				clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
-				return 0;
 			}
 			break;
 
