@@ -29,6 +29,17 @@
 #pragma pack(push, 1)
 #endif // not NetBSD < 6 / Solaris
 
+struct PACKET_MAPCHAR_AUTH_REQ {
+	int16 packetType;
+	int account_id;
+	int char_id;
+	int login_id1;
+	uint8 sex;
+	int client_addr;
+	uint8 standalone; // 0 - real player (false) / 1 - standalone/server generated (true)
+} __attribute__((packed));
+DEFINE_PACKET_ID(MAPCHAR_AUTH_REQ, 0x2b26)
+
 struct PACKET_MAPCHAR_AGENCY_JOIN_PARTY_REQ {
 	int16 packetType;
 	int char_id;
