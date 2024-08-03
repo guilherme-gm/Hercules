@@ -30,6 +30,12 @@
 #pragma pack(push, 1)
 #endif // not NetBSD < 6 / Solaris
 
+struct PACKET_CHARLOGIN_SET_ACCOUNT_ONLINE {
+	int16 packetType;
+	int account_id;
+} __attribute__((packed));
+DEFINE_PACKET_ID(CHARLOGIN_SET_ACCOUNT_ONLINE, 0x272b)
+
 struct PACKET_CHARLOGIN_ONLINE_ACCOUNTS {
 	int16 packetType;
 	uint16 packetLength;
