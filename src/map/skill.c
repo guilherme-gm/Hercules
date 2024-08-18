@@ -2398,8 +2398,10 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 					rate += 10;
 				if(sc->data[SC_OVERTHRUST])
 					rate += 10;
-				if(sc->data[SC_OVERTHRUSTMAX])
+#ifndef RENEWAL
+				if(sc->data[SC_OVERTHRUSTMAX])   //RENEWAL removed this chance to break
 					rate += 10;
+#endif
 			}
 			if( rate )
 				skill->break_equip(src, EQP_WEAPON, rate, BCT_SELF);
