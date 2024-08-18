@@ -5107,6 +5107,10 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 		// Splash attack skills.
 		case AS_GRIMTOOTH:
 		case MC_CARTREVOLUTION:
+#ifdef RENEWAL
+		case KN_BOWLINGBASH:
+		case MS_BOWLINGBASH:
+#endif
 		case NPC_SPLASHATTACK:
 			flag |= SD_PREAMBLE; // a fake packet will be sent for the first target to be hit
 			FALLTHROUGH
@@ -5302,7 +5306,11 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 			else
 				skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag);
 			break;
-
+#ifdef RENEWAL
+			//skill->attack(skill->get_type(skill_id, skill_lv), src, src, bl, skill_id, skill_lv, tick, flag|SD_ANIMATION);
+			//skill->area_temp[0] = map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),skill->splash_target(src), src,skill_id,skill_lv,tick, BCT_ENEMY, skill->area_sub_count);
+			//map->foreachinrange(skill->area_sub, bl, skill->get_splash(skill_id, skill_lv),skill->splash_target(src), src,skill_id,skill_lv,tick,flag | BCT_ENEMY | SD_SPLASH | 1, skill->castend_damage_id);
+#else
 		case KN_BOWLINGBASH:
 		case MS_BOWLINGBASH:
 			{
@@ -5379,8 +5387,8 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				// Original hit or chain hit depending on flag
 				skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,(flag&0xFFF)>0?SD_ANIMATION:0);
 			}
+#endif
 			break;
-
 		case KN_SPEARSTAB:
 			if(flag&1) {
 				if (bl->id==skill->area_temp[1])

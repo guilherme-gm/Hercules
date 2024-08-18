@@ -4763,8 +4763,9 @@ static int status_calc_critical(struct block_list *bl, struct status_change *sc,
 #ifdef RENEWAL
 	if (sc->data[SC_SPEARQUICKEN])
 		critical += 3*sc->data[SC_SPEARQUICKEN]->val1 * 10;
+	if (sc->data[SC_TWOHANDQUICKEN])
+		critical += sc->data[SC_TWOHANDQUICKEN]->val4 * 10;
 #endif
-
 	if (sc->data[SC__INVISIBILITY])
 		critical += sc->data[SC__INVISIBILITY]->val3;
 	if (sc->data[SC__UNLUCKY])
@@ -4834,6 +4835,10 @@ static int status_calc_hit(struct block_list *bl, struct status_change *sc, int 
 		hit -= sc->data[SC_HEAT_BARREL]->val4;
 	if (sc->data[SC_SOULFALCON] != NULL)
 		hit += sc->data[SC_SOULFALCON]->val3;
+#ifdef RENEWAL
+	if(sc->data[SC_TWOHANDQUICKEN])
+		hit += sc->data[SC_TWOHANDQUICKEN]->val1 * 2; ///Hit bonus, used in renewal only
+#endif
 
 	return cap_value(hit, battle_config.hit_min, battle_config.hit_max);
 }
@@ -5554,8 +5559,12 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 			bonus += sc->data[SC_STEAMPACK]->val2;
 		if (sc->data[SC_SKF_ASPD] != NULL)
 			bonus += sc->data[SC_SKF_ASPD]->val1;
-	}
-
+	#ifdef RENEWAL
+		if (sc->data[SC_TWOHANDQUICKEN])
+			bonus += sc->data[SC_TWOHANDQUICKEN]->val3;
+		if(sc->data[SC_SPEARQUICKEN])
+			bonus += sc->data[SC_SPEARQUICKEN]->val3;
+	#endif
 	return (bonus + pots);
 #else
 	return 0;
@@ -7810,18 +7819,19 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				break;
 			case SC_ONEHANDQUICKEN:
 			case SC_TWOHANDQUICKEN:
-				val2 = 300;
+				val2 = 300; //"flat" aspd bonus
+				val3 = 10; //%aspd bonus, used in Renewal only
+				val4 = val1 + 2; //%Crit rate bonus, used in Renewal only, it is x10 in calc
 				if (val1 > 10) //For boss casted skills [Skotlex]
 					val2 += 20*(val1-10);
 				break;
 			case SC_MER_QUICKEN:
 				val2 = 300;
 				break;
-	#ifndef RENEWAL_ASPD
 			case SC_SPEARQUICKEN:
 				val2 = 200+10*val1;
+				val3 = 10; //used in renewal
 				break;
-	#endif
 			case SC_DANCING:
 				//val1 : Skill ID + LV
 				//val2 : Skill Group of the Dance.
@@ -8312,9 +8322,14 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 					total_tick += total_tick / 10;
 				break;
 			case SC_LKCONCENTRATION:
-				val2 = 5 * val1; // ATK% Increase
 				val3 = 10*val1; //Hit Increase
+	#ifdef RENEWAL
+				val2 = 5 + 2 * val1; //Batk/Watk Increase >>RENEWAL changed
+				val4 = 5 + 2 * val1; //Def reduction >>RENEWAL changed
+	#else
+				val2 = 5 * val1; // ATK% Increase
 				val4 = 5 * val1; // Def% reduction
+	#endif
 				sc_start(src, bl, SC_ENDURE, 100, 1, total_tick, skill_id); // Endure effect
 				break;
 			case SC_ANGELUS:

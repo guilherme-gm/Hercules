@@ -2088,22 +2088,28 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case KN_SPEARBOOMERANG:
 					skillratio += 50*skill_lv;
 					break;
+#ifdef RENEWAL
 				case KN_BRANDISHSPEAR:
+					skillratio += -100 + 400 + 100 * skill_lv + st->str * 5; //rathena is using * 3 here, but IRO and other sites say it's str*5.
+					break;
+#else
+				case KN_BRANDISHSPEAR:
+#endif
 				case ML_BRANDISH:
 				{
 					int ratio = 100 + 20 * skill_lv;
 					skillratio += ratio - 100;
-					if(skill_lv>3 && flag==1) skillratio += ratio / 2;
-					if(skill_lv>6 && flag==1) skillratio += ratio / 4;
+						if (skill_lv>3 && flag == 1) skillratio += ratio / 2;
+						if (skill_lv>6 && flag == 1) skillratio += ratio / 4;
 					if(skill_lv>9 && flag==1) skillratio += ratio / 8;
 					if(skill_lv>6 && flag==2) skillratio += ratio / 2;
 					if(skill_lv>9 && flag==2) skillratio += ratio / 4;
 					if(skill_lv>9 && flag==3) skillratio += ratio / 2;
-					break;
 				}
+					break;
 				case KN_BOWLINGBASH:
 				case MS_BOWLINGBASH:
-					skillratio+= 40 * skill_lv;
+					skillratio += 40 * skill_lv;
 					break;
 				case AS_GRIMTOOTH:
 					skillratio += 20 * skill_lv;
@@ -2257,7 +2263,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 	#else
 				case LK_SPIRALPIERCE:
 				case ML_SPIRALPIERCE:
-					skillratio += 50 * skill_lv;
+					skillratio += 50 + 50 * skill_lv;
+					RE_LVL_DMOD(100);
 	#endif
 					break;
 				case PA_SACRIFICE:
@@ -3784,7 +3791,11 @@ static int battle_range_type(struct block_list *src, struct block_list *target, 
 		else
 			return BF_LONG;
 	}
-
+	// Renewal changes to ranged physical damage
+#ifdef RENEWAL
+	if (skill_id == KN_BRANDISHSPEAR)
+		return BF_SHORT;
+#endif
 	//based on used skill's range
 	if (skill->get_range2(src, skill_id, skill_lv) < 5)
 		return BF_SHORT;
@@ -4728,13 +4739,24 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 
 			case GS_GROUNDDRIFT:
 			case KN_SPEARSTAB:
+#ifndef RENEWAL
 			case KN_BOWLINGBASH:
 			case MS_BOWLINGBASH:
+#endif
 			case MO_BALKYOUNG:
 			case TK_TURNKICK:
 				wd.blewcount=0;
 				break;
-
+#ifdef RENEWAL
+			case KN_BOWLINGBASH:
+				if (sd != NULL && sd->weapontype == W_2HSWORD) { //2handed swords deal more hits damage if there are more than 2 enemies in area
+					//if (wflag >= 2 && wflag <= 3)       // NOT WORKING ATM, keeping 4 hits for 2hswords on any target
+					//	wd.div_ = 3;
+					//else if (wflag >= 4)
+						wd.div_ = 4;
+				}
+				break;
+#endif
 			case KN_AUTOCOUNTER:
 				wd.flag=(wd.flag&~BF_SKILLMASK)|BF_NORMAL;
 				break;
@@ -5463,11 +5485,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 						ATK_ADD(sd->inventory_data[index]->weight * 7 / 100);
 
 					switch (tstatus->size) {
-						case SZ_SMALL: //Small: 115%
-							ATK_RATE(115);
+						case SZ_SMALL: //Small: 115% >>> changed to 125% on update
+							ATK_RATE(125);
 							break;
-						case SZ_BIG: //Large: 85%
-							ATK_RATE(85);
+						case SZ_BIG: //Large: 85% >>> changed to 75% in update
+							ATK_RATE(75);
 					}
 					wd.damage = battle->calc_masteryfix(src, target, skill_id, skill_lv, wd.damage, wd.div_, 0, flag.weapon);
 					wd.damage = battle->calc_cardfix2(src, target, wd.damage, s_ele, nk, wd.flag);
@@ -5778,8 +5800,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				int lv = sc->data[SC_AURABLADE]->val1;
 #ifdef RENEWAL
 				lv *= ((skill_id == LK_SPIRALPIERCE || skill_id == ML_SPIRALPIERCE)?wd.div_:1); // +100 per hit in lv 5
-#endif
+				ATK_ADD(sd->status.base_level * (lv+3)); //damage increased quite a lot
+#else
 				ATK_ADD(20*lv);
+#endif
 			}
 
 			if( !skill_id ) {
