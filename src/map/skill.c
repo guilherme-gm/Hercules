@@ -1830,7 +1830,11 @@ static int skill_additional_effect(struct block_list *src, struct block_list *bl
 			break;
 
 		case AM_DEMONSTRATION:
+#ifdef RENEWAL
+			skill->break_equip(bl, EQP_WEAPON, 300*skill_lv, BCT_ENEMY); //RENEWAL improved chance to break
+#else
 			skill->break_equip(bl, EQP_WEAPON, 100*skill_lv, BCT_ENEMY);
+#endif
 			break;
 
 		case CR_SHIELDCHARGE:

@@ -2211,11 +2211,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				}
 				case AM_DEMONSTRATION:
+#ifdef RENEWAL
+					skillratio += -100 + 60 * skill_lv;
+						if (sd)
+						skillratio += 20 * pc->checkskill(sd,AM_LEARNINGPOTION);
+					break;
+#else
 					skillratio += 20 * skill_lv;
+#endif
 					break;
 				case AM_ACIDTERROR:
 #ifdef RENEWAL
-					skillratio += 80 * skill_lv + 100;
+					skillratio += -100 + 200 * skill_lv;
+					if (sd)
+						skillratio += 20 * pc->checkskill(sd,AM_LEARNINGPOTION);
 #else
 					skillratio += 40 * skill_lv;
 #endif
@@ -5491,9 +5500,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					ATK_ADD(sstatus->rhw.atk2); //Else use Atk2
 				ATK_RATE(battle->calc_skillratio(BF_WEAPON, src, target, skill_id, skill_lv, skillratio, wflag));
 				break;
+
 			case AM_DEMONSTRATION:
 			case AM_ACIDTERROR: // [malufett/Hercules]
 			{
+		#ifndef RENEWAL  //on renewal this nonsense of using both atk and matk was removed, both skills use ATK
 				int64 matk;
 				int totaldef = status->get_total_def(target) + status->get_total_mdef(target);
 				matk = battle->calc_cardfix(BF_MAGIC, src, target, nk, s_ele, 0, status->get_matk(src, 2), 0, wd.flag);
@@ -5503,6 +5514,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				ATK_RATE(battle->calc_skillratio(BF_WEAPON, src, target, skill_id, skill_lv, skillratio, wflag));
 				ATK_ADD(matk);
 				ATK_ADD(-totaldef);
+		#endif
 				if ( skill_id == AM_ACIDTERROR && is_boss(target) )
 					ATK_RATE(50);
 				if ( skill_id == AM_DEMONSTRATION )
