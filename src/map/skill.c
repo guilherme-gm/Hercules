@@ -7310,8 +7310,12 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 					break;
 				}
 			}
+#ifdef RENEWAL
+			if (!clif->skill_nodamage(src, bl, skill_id, skill_lv, sc_start(src, bl, type, 100, skill_lv, skill->get_time(skill_id, skill_lv), skill_id))) { //RENEWAL buff never fails
+#else
 			// 100% success rate at lv4 & 5, but lasts longer at lv5
 			if (!clif->skill_nodamage(src, bl, skill_id, skill_lv, sc_start(src, bl, type, (60 + skill_lv * 10), skill_lv, skill->get_time(skill_id, skill_lv), skill_id))) {
+#endif
 				if (sd)
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
 				if (skill->break_equip(bl, EQP_WEAPON, 10000, BCT_PARTY) && sd && sd != dstsd)
