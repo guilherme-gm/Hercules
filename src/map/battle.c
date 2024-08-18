@@ -1754,6 +1754,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					if (sd && sd->charm_type == CHARM_TYPE_WATER && sd->charm_count > 0)
 						skillratio += 5 * sd->charm_count;
 					break;
+				case NJ_HUUJIN:
+					skillratio += 50;
+					if (sd && sd->charm_type == CHARM_TYPE_WIND && sd->charm_count > 0)
+						skillratio += 20 * sd->charm_count;
+					break;
 #endif
 				case NJ_HYOUSYOURAKU:
 					skillratio += 50 * skill_lv;
@@ -1772,13 +1777,6 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case NPC_ENERGYDRAIN:
 					skillratio += 100 * skill_lv;
 					break;
-			#ifdef RENEWAL
-				case NJ_HUUJIN:
-					skillratio += 50;
-					if (sd && sd->charm_type == CHARM_TYPE_WIND && sd->charm_count > 0)
-						skillratio += 20 * sd->charm_count;
-					break;
-			#endif
 				/**
 				 * Summoner
 				 **/
