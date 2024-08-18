@@ -17213,7 +17213,11 @@ static struct skill_condition skill_get_requirement(struct map_session_data *sd,
 					switch( sc->data[SC_COMBOATTACK]->val1 )
 					{
 						case MO_COMBOFINISH:
+#ifdef RENEWAL
+							req.spiritball = 1; //RENEWAL buff
+#else
 							req.spiritball = 4;
+#endif
 							break;
 						case CH_TIGERFIST:
 							req.spiritball = 3;

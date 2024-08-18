@@ -2230,10 +2230,22 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 #endif
 					break;
 				case MO_FINGEROFFENSIVE:
+#ifdef RENEWAL
+					skillratio+= 500 + 200 * skill_lv;
+						if (tsc && tsc->data[SC_BLADESTOP]) // +50% on targets under Root skill
+						skillratio += skillratio/2;
+#else
 					skillratio+= 50 * skill_lv;
+#endif
 					break;
 				case MO_INVESTIGATE:
+#ifdef RENEWAL
+					skillratio += -100 + 100 * skill_lv;
+						if (tsc && tsc->data[SC_BLADESTOP]) // +50% on targets under Root skill
+						skillratio += skillratio/2;
+#else
 					skillratio += 75 * skill_lv;
+#endif
 					break;
 				case MO_EXTREMITYFIST:
 	#ifndef RENEWAL
@@ -2250,10 +2262,20 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 20 * skill_lv;
 					break;
 				case MO_CHAINCOMBO:
+#ifdef RENEWAL
+					skillratio += 150 + 50 * skill_lv;
+						if (sd != NULL && sd->weapontype == W_KNUCKLE)
+						skillratio *= 2; ///TODO: should display the damage as 6 hits and the sp cost should be reduce to 6.
+#else
 					skillratio += 50 + 50 * skill_lv;
+#endif
 					break;
 				case MO_COMBOFINISH:
+#ifdef RENEWAL
+					skillratio += 500 + 150 * skill_lv + (5 * st->str);
+#else
 					skillratio += 140 + 60 * skill_lv;
+#endif
 					break;
 				case BA_MUSICALSTRIKE:
 				case DC_THROWARROW:
@@ -4760,7 +4782,7 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 					if (battle_config.finger_offensive_type)
 						wd.div_ = 1;
 					else
-						wd.div_ = sd->spiritball_old;
+						wd.div_ = sd->spiritball_old; ///This increases the number of hits per spiritball? if so shoud be removed from Renewal code
 				}
 				break;
 			case HT_PHANTASMIC:
@@ -5490,7 +5512,10 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				short totaldef = status->get_total_def(target);
 				GET_NORMAL_ATTACK((sc && sc->data[SC_MAXIMIZEPOWER] ? 1 : 0) | 8, skill_id);
 				if ( wd.damage ) {
-					ATK_ADD(250 * (skill_lv + 1) + (10 * (status_get_sp(src) + 1) * wd.damage / 100) + (8 * wd.damage));
+					if (sd->spiritball > 5)
+						ATK_ADD(2*(250 + (150 * skill_lv) + (10 * (status_get_sp(src) + 1) * wd.damage / 100) + (8 * wd.damage))); //pretty sure the bonus damage was slightly off
+					else
+						ATK_ADD(250 + (150 * skill_lv) + (10 * (status_get_sp(src) + 1) * wd.damage / 100) + (8 * wd.damage));
 					ATK_ADD(-totaldef);
 				}
 			}
@@ -6722,7 +6747,11 @@ static enum damage_lv battle_weapon_attack(struct block_list *src, struct block_
 	}
 
 	if(sd && (skillv = pc->checkskill(sd,MO_TRIPLEATTACK)) > 0) {
+#ifdef RENEWAL
+		int triple_rate= 30; //Base Rate
+#else
 		int triple_rate= 30 - skillv; //Base Rate
+#endif
 		if (sc && sc->data[SC_SKILLRATE_UP] && sc->data[SC_SKILLRATE_UP]->val1 == MO_TRIPLEATTACK) {
 			triple_rate += triple_rate * (sc->data[SC_SKILLRATE_UP]->val2) /100;
 			status_change_end(src, SC_SKILLRATE_UP, INVALID_TIMER);
