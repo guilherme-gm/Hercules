@@ -2184,7 +2184,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 						skillratio += 200 + 40 * skill_lv;
 					break;
 				case RG_RAID:
+#ifdef RENEWAL
+					skillratio += -50 + 150 * skill_lv;
+#else
 					skillratio += 40 * skill_lv;
+#endif
 					break;
 				case RG_INTIMIDATE:
 					skillratio += 30 * skill_lv;
@@ -4787,6 +4791,12 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				}
 				break;
 #endif
+#ifdef RENEWAL
+			case RG_BACKSTAP:
+				if (sd != NULL && sd->weapontype == W_DAGGER)
+					wd.div_ = 2;
+				break;
+#endif
 			case KN_AUTOCOUNTER:
 				wd.flag=(wd.flag&~BF_SKILLMASK)|BF_NORMAL;
 				break;
@@ -5159,6 +5169,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 			case LG_BANISHINGPOINT:
 				hitrate += 3 * skill_lv;
 				break;
+#ifdef RENEWAL
+			case RG_BACKSTAP:
+				hitrate += skill_lv * 4; //Renewal buff: added hitrate on Back Stab
+				break;
+#endif
 			case RL_SLUGSHOT:
 				{
 					int dist = distance_bl(src, target);

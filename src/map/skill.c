@@ -5022,6 +5022,32 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 
 		case RG_BACKSTAP:
 			{
+#ifdef RENEWAL //copied code from Asura strike with i=1
+			short x, y, i = 1;
+			struct block_list *mbl = bl;
+			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
+
+			enum unit_dir dir = map->calc_dir(src, bl->x, bl->y);
+			if (Assert_chk(dir >= UNIT_DIR_FIRST && dir < UNIT_DIR_MAX)) {
+				map->freeblock_unlock(); // unblock before assert-returning
+				return 0;
+			}
+			x = i * dirx[dir];
+			y = i * diry[dir];
+			if ((mbl == src || (!map_flag_gvg2(src->m) && !map->list[src->m].flag.battleground))) {
+				if (unit->move_pos(src, mbl->x + x, mbl->y + y, 1, true) != 0) {
+					// The cell is not reachable (wall, object, ...), move next to the target
+					if (x > 0) x = -1;
+					else if (x < 0) x = 1;
+					if (y > 0) y = -1;
+					else if (y < 0) y = 1;
+
+					unit->move_pos(src, bl->x + x, bl->y + y, 1, true);
+				}
+				clif->slide(src, src->x, src->y);
+				clif->fixpos(src);
+			}
+#else    //old backstab, PRE-RE
 				enum unit_dir dir = map->calc_dir(src, bl->x, bl->y);
 				enum unit_dir t_dir = unit->getdir(bl);
 				if ((!check_distance_bl(src, bl, 0) && map->check_dir(dir, t_dir) == 0) || bl->type == BL_SKILL) {
@@ -5032,9 +5058,9 @@ static int skill_castend_damage_id(struct block_list *src, struct block_list *bl
 				}
 				else if (sd)
 					clif->skill_fail(sd, skill_id, USESKILL_FAIL_LEVEL, 0, 0);
+#endif
 			}
 			break;
-
 		case MO_FINGEROFFENSIVE:
 			skill->attack(BF_WEAPON,src,src,bl,skill_id,skill_lv,tick,flag);
 			if (battle_config.finger_offensive_type && sd) {
@@ -6420,9 +6446,14 @@ static int skill_castend_id(int tid, int64 tick, int id, intptr_t data)
 		}
 
 		if(ud->skill_id == RG_BACKSTAP) {
+	#ifndef RENEWAL
 			enum unit_dir dir = map->calc_dir(src, target->x, target->y);
 			enum unit_dir t_dir = unit->getdir(target);
-			if (check_distance_bl(src, target, 0) || map->check_dir(dir, t_dir) != 0) {
+			if (map->check_dir(dir, t_dir) != 0) {
+			break;
+			}
+	#endif
+			if (check_distance_bl(src, target, 0)) {
 				break;
 			}
 		}

@@ -975,7 +975,9 @@ static int status_check_skilluse(struct block_list *src, struct block_list *targ
 			switch (skill_id) { //Usable skills while hiding.
 				case TF_HIDING:
 				case AS_GRIMTOOTH:
+#ifndef RENEWAL //backstab rework cant be used while hiding
 				case RG_BACKSTAP:
+#endif
 				case RG_RAID:
 				case NJ_SHADOWJUMP:
 				case NJ_KIRIKAGE:
@@ -3699,6 +3701,11 @@ static int status_base_amotion_pc(struct map_session_data *sd, struct status_dat
 		val += (skill_lv - 1) / 2 + 1;
 	if ( (skill_lv = pc->checkskill(sd, GS_SINGLEACTION)) > 0 )
 		val += ((skill_lv + 1) / 2);
+#ifdef RENEWAL
+	if ((skill_lv = pc->checkskill(sd, RG_PLAGIARISM)) > 0)
+		val += skill_lv;
+#endif
+
 	amotion = ((int)(temp + ((float)(status->calc_aspd(&sd->bl, &sd->sc, 1) + val) * st->agi / 200)) - min(amotion, 200));
 #else
 	// base weapon delay
