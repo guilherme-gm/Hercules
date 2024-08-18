@@ -2262,6 +2262,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case SN_SHARPSHOOTING:
 				case MA_SHARPSHOOTING:
+#ifdef RENEWAL
+					skillratio += 200 + 300 * skill_lv;
+					RE_LVL_DMOD(100);
+#else
 					skillratio += 100 + 50 * skill_lv;
 					break;
 				case CG_ARROWVULCAN:
@@ -4267,14 +4271,18 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 		//Blitz-beat Damage.
 		if(!sd || (temp = pc->checkskill(sd,HT_STEELCROW)) <= 0)
 			temp=0;
+#ifdef RENEWAL
+		md.damage=(sstatus->dex/10+sstatus->agi/2+temp*3+10*pc->checkskill(sd,HT_BLITZBEAT))*2;
+#else
 		md.damage=(sstatus->dex/10+sstatus->int_/2+temp*3+40)*2;
 		if(mflag > 1) //Autocasted Blitz.
 			nk|=NK_SPLASHSPLIT;
-
+#endif
 		if (skill_id == SN_FALCONASSAULT) {
 			//Div fix of Blitzbeat
-			temp = skill->get_num(HT_BLITZBEAT, 5);
-			damage_div_fix(md.damage, temp);
+			int temp2;
+			temp2 = skill->get_num(HT_BLITZBEAT, 5);
+			damage_div_fix(md.damage, temp2);
 
 			//Falcon Assault Modifier
 			md.damage=md.damage*(150+70*skill_lv)/100;
@@ -5013,7 +5021,11 @@ static struct Damage battle_calc_weapon_attack(struct block_list *src, struct bl
 				break;
 			case SN_SHARPSHOOTING:
 			case MA_SHARPSHOOTING:
+#ifdef RENEWAL
+				cri += 500;
+#else
 				cri += 200;
+#endif
 				break;
 			case NJ_KIRIKAGE:
 				cri += 250 + 50*skill_lv;
