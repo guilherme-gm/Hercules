@@ -522,7 +522,7 @@ static int64 battle_calc_weapon_damage(struct block_list *src, struct block_list
 	}
 
 #ifdef RENEWAL_EDP
-	if ( sc && sc->data[SC_EDP] && skill_id != AS_GRIMTOOTH && skill_id != AS_VENOMKNIFE && skill_id != ASC_BREAKER ) {
+	if (sc && sc->data[SC_EDP] && skill_id != AS_GRIMTOOTH && skill_id != AS_VENOMKNIFE && skill_id != ASC_METEORASSAULT) { //SOUL DESTROYER gets benefit from EDP, but Meteor Assault doesnt
 		struct status_data *tstatus;
 		tstatus = status->get_status_data(bl);
 		eatk += damage * 0x19 * battle->attr_fix_table[tstatus->ele_lv - 1][ELE_POISON][tstatus->def_ele] / 10000;
@@ -2133,7 +2133,14 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 30 * skill_lv;
 					break;
 				case AS_SONICBLOW:
+#ifdef RENEWAL
+
+					skillratio += 100 + 100 * skill_lv;
+					if (tst->hp < (tst->max_hp / 2))
+					skillratio += skillratio / 2;
+#else
 					skillratio += 300 + 40 * skill_lv;
+#endif
 					break;
 				case TF_SPRINKLESAND:
 					skillratio += 30;
@@ -2258,7 +2265,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += i;
 					break;
 				case ASC_METEORASSAULT:
+#ifdef RENEWAL
+					skillratio += 100 + 120 * skill_lv + 5 * st->str;
+					RE_LVL_DMOD(100);
+#else
 					skillratio += 40 * skill_lv - 60;
+#endif
 					break;
 				case SN_SHARPSHOOTING:
 				case MA_SHARPSHOOTING:
@@ -2272,9 +2284,13 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 100 + 100 * skill_lv;
 					break;
 				case AS_SPLASHER:
+#ifdef RENEWAL
+					skillratio += -100 + 400 + 100 * skill_lv;
+#else
 					skillratio += 400 + 50 * skill_lv;
 					if(sd)
 						skillratio += 20 * pc->checkskill(sd,AS_POISONREACT);
+#endif
 					break;
 	#ifndef RENEWAL
 				case ASC_BREAKER:
@@ -2934,14 +2950,6 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 			}
 			//Skill damage modifiers that stack linearly
 			if(sc && skill_id != PA_SACRIFICE){
-#ifdef RENEWAL_EDP
-				if( sc->data[SC_EDP] ){
-					if( skill_id == AS_SONICBLOW ||
-						skill_id == GC_COUNTERSLASH ||
-						skill_id == GC_CROSSIMPACT )
-							skillratio >>= 1;
-				}
-#endif
 				if(sc->data[SC_OVERTHRUST])
 					skillratio += sc->data[SC_OVERTHRUST]->val3;
 				if(sc->data[SC_OVERTHRUSTMAX])
@@ -4397,10 +4405,7 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 		int64 matk = battle->calc_magic_attack(src, target, skill_id, skill_lv, mflag).damage;
 		short totaldef = status->get_total_def(target) + status->get_total_mdef(target);
 		int64 atk = battle->calc_base_damage(src, target, skill_id, skill_lv, nk, false, s_ele, ELE_NEUTRAL, EQI_HAND_R, (sc && sc->data[SC_MAXIMIZEPOWER] ? 1 : 0) | (sc && sc->data[SC_WEAPONPERFECT] ? 8 : 0), md.flag);
-#ifdef RENEWAL_EDP
-		if( sc && sc->data[SC_EDP] )
-			ratio >>= 1;
-#endif
+
 		md.damage = (matk + atk) * ratio / 100;
 		md.damage -= totaldef;
 #endif

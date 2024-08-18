@@ -7695,15 +7695,15 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				total_tick = INFINITE_DURATION; // duration sent to the client should be infinite
 				break;
 			case SC_EDP: // [Celest]
-				//Chance to Poison enemies.
 #ifdef RENEWAL_EDP
-				val2 = ((val1 + 1) / 2 + 2);
+				val2 = ((val1 + 1) / 2 + 2); //Chance to Poison enemies.
+				val3 = 150 + val1 * 30; //From rathena and iROwiki = dmg *(2.5 + (edp level * .3)). Since we are adding damage in the calculations, the formula for renewal is 150+30*lvl
 #else
-				val2 = val1 + 2;
-#endif
+				val2 = val1 + 2; //Chance to Poison enemies.
 				val3 = 50 * (val1 + 1); //Damage increase (+50 +50*lv%)
-				if( sd )//[Ind] - iROwiki says each level increases its duration by 3 seconds
-					total_tick += pc->checkskill(sd,GC_RESEARCHNEWPOISON)*3000;
+#endif
+				if (sd && pc->checkskill(sd,GC_RESEARCHNEWPOISON) > 0) //[Ind] - iROwiki says each level increases its duration by 3 seconds >[gbasso] updated in 2022 to researchlvl*15 + 30sec
+					total_tick += 30000 + pc->checkskill(sd, GC_RESEARCHNEWPOISON) * 15000;
 				break;
 			case SC_POISONREACT:
 				val2=(val1+1)/2 + val1/10; // Number of counters [Skotlex]
