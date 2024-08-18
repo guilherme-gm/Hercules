@@ -1158,14 +1158,12 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 		case SU_TUNABELLY:
 			hp = status_get_max_hp(target) * ((20 * skill_lv) - 10) / 100;
 			break;
+#ifndef RENEWAL //heal removed in RENEWAL, buffs incoming heal
 		case BA_APPLEIDUN:
-#ifdef RENEWAL
-			hp = 100+5*skill_lv+5*(status_get_vit(src)/10); // HP recovery
-#else // not RENEWAL
 			hp = 30+5*skill_lv+5*(status_get_vit(src)/10); // HP recovery
-#endif // RENEWAL
 			if( sd )
 				hp += 5*pc->checkskill(sd,BA_MUSICALLESSON);
+#endif
 			break;
 		case PR_SANCTUARY:
 			hp = (skill_lv>6)?777:skill_lv*100;
@@ -1230,6 +1228,8 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 #ifdef RENEWAL
 		if(sc->data[SC_ASSUMPTIO])
 			hp += hp * (sc->data[SC_ASSUMPTIO]->val1 * 2) / 100;
+		if(sc->data[SC_APPLEIDUN])
+			hp += hp * (sc->data[SC_APPLEIDUN]->val3) / 100;
 #endif
 	}
 
@@ -13301,22 +13301,32 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 			val1 = 10; //FIXME: This value is not used anywhere, what is it for? [Skotlex]
 			break;
 		case BA_WHISTLE:
+#ifdef RENEWAL
+			val1 = 18 + skill_lv*2; // Flee increase
+			val2 = (skill_lv + 1) / 2; // Perfect dodge increase
+#else
 			val1 = skill_lv +st->agi/10; // Flee increase
 			val2 = ((skill_lv+1)/2)+st->luk/10; // Perfect dodge increase
 			if(sd){
 				val1 += pc->checkskill(sd,BA_MUSICALLESSON);
 				val2 += pc->checkskill(sd,BA_MUSICALLESSON);
 			}
+#endif
 			break;
 		case DC_HUMMING:
-			val1 = 2*skill_lv+st->dex/10; // Hit increase
 			#ifdef RENEWAL
-				val1 *= 2;
-			#endif
+			val1 = 4*skill_lv;
+#else
+			val1 = 2*skill_lv+st->dex/10; // Hit increase
 			if(sd)
 				val1 += pc->checkskill(sd,DC_DANCINGLESSON);
+#endif
 			break;
 		case BA_POEMBRAGI:
+#ifdef RENEWAL
+			val1 = 2 * skill_lv; // Casting time reduction
+			val2 = 3 * skill_lv; // After-cast delay reduction
+#else
 			val1 = 3*skill_lv+st->dex/10; // Casting time reduction
 			//For some reason at level 10 the base delay reduction is 50%.
 			val2 = (skill_lv<10?3*skill_lv:50)+st->int_/5; // After-cast delay reduction
@@ -13324,6 +13334,7 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 				val1 += 2*pc->checkskill(sd,BA_MUSICALLESSON);
 				val2 += 2*pc->checkskill(sd,BA_MUSICALLESSON);
 			}
+#endif
 			break;
 		case DC_DONTFORGETME:
 #ifdef RENEWAL
@@ -13332,24 +13343,34 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 #else
 			val1 = st->dex/10 + 3*skill_lv + 5; // ASPD decrease
 			val2 = st->agi/10 + 3*skill_lv + 5; // Movement speed adjustment.
-#endif
 			if(sd){
 				val1 += pc->checkskill(sd,DC_DANCINGLESSON);
 				val2 += pc->checkskill(sd,DC_DANCINGLESSON);
 			}
+#endif
 			break;
 		case BA_APPLEIDUN:
-			val1 = 5+2*skill_lv+st->vit/10; // MaxHP percent increase
+#ifdef RENEWAL
+			val2 = 9 + skill_lv + skill_lv/5; // MaxHP percent increase
+			val3 = skill_lv * 2; //heal buff
+#else
+			val2 = 5+2*skill_lv+st->vit/10; // MaxHP percent increase
 			if(sd)
-				val1 += pc->checkskill(sd,BA_MUSICALLESSON);
+				val2 += pc->checkskill(sd,BA_MUSICALLESSON);
+#endif
 			break;
 		case DC_SERVICEFORYOU:
+#ifdef RENEWAL
+			val1 = 9+skill_lv+(st->int_/10)*2; // MaxSP percent increase
+			val2 = 5*skill_lv; // SP cost reduction
+#else
 			val1 = 15+skill_lv+(st->int_/10); // MaxSP percent increase
 			val2 = 20+3*skill_lv+(st->int_/10); // SP cost reduction
 			if(sd){
 				val1 += pc->checkskill(sd,DC_DANCINGLESSON) / 2;
 				val2 += pc->checkskill(sd,DC_DANCINGLESSON) / 2;
 			}
+#endif
 			break;
 		case BA_ASSASSINCROSS:
 			if(sd)
@@ -13365,15 +13386,20 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 #endif
 			break;
 		case DC_FORTUNEKISS:
+#ifdef RENEWAL
+			val1 = skill_lv; // Critical increase
+			val1 *= 10;
+#else
 			val1 = 10+skill_lv+(st->luk/10); // Critical increase
 			if(sd)
 				val1 += pc->checkskill(sd,DC_DANCINGLESSON);
-			val1*=10; //Because every 10 crit is an actual cri point.
+				val1 *= 10;
+#endif
 			break;
 		case BD_DRUMBATTLEFIELD:
 		#ifdef RENEWAL
-			val1 = (skill_lv+5)*25; //Watk increase
-			val2 = skill_lv*10; //Def increase
+			val1 = 15 + (skill_lv*5); //Watk increase
+			val2 = skill_lv*15; //Def increase
 		#else
 			val1 = (skill_lv+1)*25; //Watk increase
 			val2 = (skill_lv+1)*2; //Def increase
@@ -13383,11 +13409,20 @@ static struct skill_unit_group *skill_unitsetting(struct block_list *src, uint16
 			val1 = (skill_lv+2)*25; //Watk increase
 			break;
 		case BD_RICHMANKIM:
+#ifdef RENEWAL
+			val1 = 10 + 10*skill_lv; //Exp increase bonus.
+#else
 			val1 = 25 + 11*skill_lv; //Exp increase bonus.
+#endif
 			break;
 		case BD_SIEGFRIED:
+#ifdef RENEWAL
+			val1 = skill_lv*3; //Elemental Resistance RENEWAL reword
+			val2 = skill_lv*5; //Status ailment resistance RENEWAL rework
+#else
 			val1 = 55 + skill_lv*5; //Elemental Resistance
 			val2 = skill_lv*10; //Status ailment resistance
+#endif
 			break;
 		case WE_CALLPARTNER:
 			if (sd) val1 = sd->status.partner_id;

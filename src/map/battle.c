@@ -2257,7 +2257,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					break;
 				case BA_MUSICALSTRIKE:
 				case DC_THROWARROW:
+#ifdef RENEWAL
+					skillratio += 10 + 40 * skill_lv;
+#else
 					skillratio += 25 + 25 * skill_lv;
+#endif
 					break;
 				case CH_TIGERFIST:
 					skillratio += 100 * skill_lv - 60;
@@ -4312,11 +4316,13 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 	case TF_THROWSTONE:
 		md.damage=50;
 		break;
+#ifndef RENEWAL  //This skills no longer do flat damage on renewal
 	case BA_DISSONANCE:
 		md.damage=30+skill_lv*10;
 		if (sd)
 			md.damage+= 3*pc->checkskill(sd,BA_MUSICALLESSON);
 		break;
+#endif
 	case NPC_SELFDESTRUCTION:
 		md.damage = sstatus->hp;
 		break;

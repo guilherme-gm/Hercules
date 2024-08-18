@@ -1967,7 +1967,12 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->max_sp += 30 * skill_lv;
 	if ((pc->checkskill(sd,SU_SPRITEMABLE)) > 0)
 		bstatus->max_sp += 100;
-
+#ifdef RENEWAL
+	if ((skill_lv = pc->checkskill(sd, BA_MUSICALLESSON)) > 0)
+		bstatus->max_sp += (int64)bstatus->max_sp * skill_lv / 100;
+	if((skill_lv = pc->checkskill(sd,DC_DANCINGLESSON)) > 0)
+		bstatus->max_sp += (int64)bstatus->max_sp * skill_lv/100;
+#endif
 	// Apply relative modifiers from equipment
 	if(sd->sprate < 0)
 		sd->sprate = 0;
@@ -2072,6 +2077,8 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 
 	// ----- CRITICAL CALCULATION -----
 #ifdef RENEWAL
+	if ((skill_lv = pc->checkskill(sd, DC_DANCINGLESSON)) > 0)
+		bstatus->cri += skill_lv * 10;
 	if ((skill_lv = pc->checkskill(sd, PR_MACEMASTERY)) > 0 && (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE))
 		bstatus->cri += skill_lv * 10;
 #endif
@@ -2376,6 +2383,10 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 			sd->right_weapon.addrace[RC_DEMON] += sc->data[SC_PHI_DEMON]->val1;
 			sd->left_weapon.addrace[RC_DEMON] += sc->data[SC_PHI_DEMON]->val1;
 		}
+#ifdef RENEWAL
+		if (sc->data[SC_FORTUNE])
+			sd->bonus.crit_atk_rate += sc->data[SC_FORTUNE]->val1 * 2 / 10;
+#endif
 	}
 	status->copy(&sd->battle_status, bstatus);
 
@@ -3702,6 +3713,8 @@ static int status_base_amotion_pc(struct map_session_data *sd, struct status_dat
 	if ( (skill_lv = pc->checkskill(sd, GS_SINGLEACTION)) > 0 )
 		val += ((skill_lv + 1) / 2);
 #ifdef RENEWAL
+	if ((skill_lv = pc->checkskill(sd, BA_MUSICALLESSON)) > 0)
+		val += skill_lv;
 	if ((skill_lv = pc->checkskill(sd, RG_PLAGIARISM)) > 0)
 		val += skill_lv;
 #endif
@@ -12195,7 +12208,9 @@ static int status_change_timer(int tid, int64 tick, int id, intptr_t data)
 				case BD_DRUMBATTLEFIELD:
 				case BD_RINGNIBELUNGEN:
 				case BD_SIEGFRIED:
+#ifndef RENEWAL
 				case BA_DISSONANCE:
+#endif
 				case BA_ASSASSINCROSS:
 				case DC_UGLYDANCE:
 					s=3;
