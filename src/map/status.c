@@ -4546,7 +4546,10 @@ static int status_calc_batk(struct block_list *bl, struct status_change *sc, int
 		batk += batk * sc->data[SC_SHRIMP]->val2 / 100;
 	if (sc->data[SC_SUNSTANCE] != NULL)
 		batk += batk * sc->data[SC_SUNSTANCE]->val2 / 100;
-
+#ifdef RENEWAL
+	if (sc->data[SC_SHOUT])
+		batk += 30; //should we use a variable for later changes?
+#endif
 	return cap_value(batk, battle_config.batk_min, battle_config.batk_max);
 }
 
