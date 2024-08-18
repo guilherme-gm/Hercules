@@ -17333,6 +17333,7 @@ static int skill_castfix(struct block_list *bl, uint16 skill_id, uint16 skill_lv
  *------------------------------------------*/
 static int skill_castfix_sc(struct block_list *bl, int time)
 {
+#ifndef RENEWAL_CAST ///seems like this is only used for pre-RENEWAL cast, there fore it's better to keep it separated.
 	struct status_change *sc = status->get_sc(bl);
 
 	if( time < 0 )
@@ -17360,12 +17361,12 @@ static int skill_castfix_sc(struct block_list *bl, int time)
 			time -= time * sc->data[SC_POEMBRAGI]->val2 / 100;
 		if (sc->data[SC_SKF_CAST] != NULL)
 			time -= time * sc->data[SC_SKF_CAST]->val1 / 100;
-		if (sc->data[SC_IZAYOI])
-			time -= time * 50 / 100;
+
 	}
 	time = max(time, 0);
 
 	//ShowInfo("Castime castfix_sc = %d\n",time);
+#endif
 	return time;
 }
 
