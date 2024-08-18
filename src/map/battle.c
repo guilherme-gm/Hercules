@@ -2197,7 +2197,11 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 20 * skill_lv;
 					break;
 				case CR_SHIELDBOOMERANG:
+#ifdef RENEWAL
+					skillratio += -100 + 80 * skill_lv;
+#else
 					skillratio += 30 * skill_lv;
+#endif
 					break;
 				case NPC_DARKCROSS:
 				case CR_HOLYCROSS:
