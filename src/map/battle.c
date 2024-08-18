@@ -2349,8 +2349,19 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 10 * skill_lv - 10;
 					break;
 				case PA_SHIELDCHAIN:
+#ifdef RENEWAL
+					skillratio += 200 + 200 * skill_lv;
+					RE_LVL_DMOD(100);
+#else
 					skillratio += 30 * skill_lv;
+#endif
 					break;
+#ifdef RENEWAL
+				case PA_PRESSURE:
+					skillratio += +400 + 150 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
+#endif
 				case WS_CARTTERMINATION:
 					i = 10 * (16 - skill_lv);
 					if (i < 1) i = 1;
@@ -3082,7 +3093,9 @@ static int64 battle_calc_damage(struct block_list *src, struct block_list *bl, s
 		return 1;
 
 	switch(skill_id) {
+#ifndef RENEWAL
 	case PA_PRESSURE:
+#endif
 	case SP_SOULEXPLOSION:
 		return damage; //This skill bypass everything else.
 	}
@@ -4348,6 +4361,9 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 		if (sd)
 			md.damage+= 3*pc->checkskill(sd,BA_MUSICALLESSON);
 		break;
+	case PA_PRESSURE:
+		md.damage=500+300*skill_lv;
+		break;
 #endif
 	case NPC_SELFDESTRUCTION:
 		md.damage = sstatus->hp;
@@ -4358,9 +4374,6 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 	case NPC_DARKBREATH:
 		md.damage = 500 + (skill_lv-1)*1000 + rnd()%1000;
 		if(md.damage > 9999) md.damage = 9999;
-		break;
-	case PA_PRESSURE:
-		md.damage=500+300*skill_lv;
 		break;
 	case PA_GOSPEL:
 		md.damage = 1+rnd()%9999;
