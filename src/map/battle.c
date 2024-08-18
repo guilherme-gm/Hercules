@@ -1682,16 +1682,45 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 30 * skill_lv;
 					break;
 				case WZ_STORMGUST:
+#ifdef RENEWAL
+					skillratio -= 30; // Offset only once
+					skillratio += 50 * skill_lv;
+#else
 					skillratio += 40 * skill_lv;
+#endif
+					break;
+				case WZ_VERMILION:
+#ifdef RENEWAL
+					skillratio += 300 + skill_lv * 100; //technically monsters should be using the old one, but w/e
+#else
+					skillratio += 20 * skill_lv - 20;
+#endif
 					break;
 #ifdef RENEWAL
+				case WZ_HEAVENDRIVE:
+				case WZ_METEOR:
+					skillratio += 25;
+					break;
+				case WZ_EARTHSPIKE:
+					skillratio += 100;
+					break;
 				case PR_MAGNUS:
 					if (battle->check_undead(tst->race,tst->def_ele) || tst->race == RC_DEMON)
 					skillratio += 30;
 					break;
+				case HW_GRAVITATION:
+					skillratio += -100 + 100 * skill_lv;
+					RE_LVL_DMOD(100);
+					break;
+				case BA_DISSONANCE:
+					skillratio += skill_lv * 10;
+							if ((skill_lv = pc->checkskill(sd, BA_MUSICALLESSON)) > 0)
+							skillratio += (skill_lv * 3);
+					break;
 #endif
 				case HW_NAPALMVULCAN:
-					skillratio += 10 * skill_lv - 30;
+					skillratio += 70 * skill_lv - 100;
+					RE_LVL_DMOD(100);
 					break;
 				case SL_STIN:
 					skillratio += (tst->size!=SZ_SMALL?-99:10*skill_lv); //target size must be small (0) for full damage.
@@ -1744,30 +1773,10 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += 100 * skill_lv;
 					break;
 			#ifdef RENEWAL
-				case WZ_HEAVENDRIVE:
-				case WZ_METEOR:
-					skillratio += 25;
-					break;
-				case WZ_VERMILION:
-				{
-					int interval = 0, per = interval, ratio = per;
-					while( (per++) < skill_lv ){
-						ratio += interval;
-						if(per%3==0) interval += 20;
-					}
-					if( skill_lv > 9 )
-						ratio -= 10;
-					skillratio += ratio;
-				}
-					break;
 				case NJ_HUUJIN:
 					skillratio += 50;
 					if (sd && sd->charm_type == CHARM_TYPE_WIND && sd->charm_count > 0)
 						skillratio += 20 * sd->charm_count;
-					break;
-			#else
-				case WZ_VERMILION:
-					skillratio += 20*skill_lv-20;
 					break;
 			#endif
 				/**
@@ -4389,10 +4398,12 @@ static struct Damage battle_calc_misc_attack(struct block_list *src, struct bloc
 #endif
 		}
 		break;
+#ifndef RENEWAL
 	case HW_GRAVITATION:
 		md.damage = 200+200*skill_lv;
 		md.dmotion = 0; //No flinch animation.
 		break;
+#endif
 	case NPC_EVILLAND:
 		md.damage = skill->calc_heal(src,target,skill_id,skill_lv,false);
 		break;
