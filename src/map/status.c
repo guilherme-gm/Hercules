@@ -2067,6 +2067,12 @@ static int status_calc_pc_(struct map_session_data *sd, enum e_status_calc_opt o
 		bstatus->flee += (skill_lv*3)>>1;
 	if (pc->checkskill(sd, SU_POWEROFLIFE) > 0)
 		bstatus->flee += 20;
+
+	// ----- CRITICAL CALCULATION -----
+#ifdef RENEWAL
+	if ((skill_lv = pc->checkskill(sd, PR_MACEMASTERY)) > 0 && (sd->weapontype == W_MACE || sd->weapontype == W_2HMACE))
+		bstatus->cri += skill_lv * 10;
+#endif
 	// ----- EQUIPMENT-DEF CALCULATION -----
 
 	// Apply relative modifiers from equipment
@@ -4836,6 +4842,8 @@ static int status_calc_hit(struct block_list *bl, struct status_change *sc, int 
 	if (sc->data[SC_SOULFALCON] != NULL)
 		hit += sc->data[SC_SOULFALCON]->val3;
 #ifdef RENEWAL
+	if(sc->data[SC_BLESSING])
+		hit += sc->data[SC_BLESSING]->val2 * 2; //hit increase, renewal only
 	if(sc->data[SC_TWOHANDQUICKEN])
 		hit += sc->data[SC_TWOHANDQUICKEN]->val1 * 2; ///Hit bonus, used in renewal only
 #endif
@@ -5075,7 +5083,7 @@ static signed short status_calc_def2(struct block_list *bl, struct status_change
 		/* some statuses that are hidden in the status window */
 #ifdef RENEWAL
 		if (sc->data[SC_ASSUMPTIO])
-			def2 <<= 1;
+			def2 += sc->data[SC_ASSUMPTIO]->val1 * 50; //TODO: Assumptio should increase heal received by (skill lvl * 2%)
 #endif
 		if (sc->data[SC_CAMOUFLAGE])
 			def2 -= def2 * 5 * (10-sc->data[SC_CAMOUFLAGE]->val4) / 100;
@@ -5195,9 +5203,9 @@ static signed short status_calc_mdef2(struct block_list *bl, struct status_chang
 		if(sc->data[SC_MDEFSET])
 			return sc->data[SC_MDEFSET]->val1;
 #ifdef RENEWAL
-		if (sc->data[SC_ASSUMPTIO])
-			mdef2 <<= 1;
-		return (short)cap_value(mdef2,SHRT_MIN,SHRT_MAX);
+		//if (sc->data[SC_ASSUMPTIO])
+		//	mdef2 <<= 1;
+		//return (short)cap_value(mdef2,SHRT_MIN,SHRT_MAX);
 #else
 		return (short)cap_value(mdef2,1,SHRT_MAX);
 #endif
@@ -5560,6 +5568,8 @@ static short status_calc_aspd(struct block_list *bl, struct status_change *sc, s
 		if (sc->data[SC_SKF_ASPD] != NULL)
 			bonus += sc->data[SC_SKF_ASPD]->val1;
 	#ifdef RENEWAL
+		if (sc->data[SC_INC_AGI])
+			bonus += sc->data[SC_INC_AGI]->val1;
 		if (sc->data[SC_TWOHANDQUICKEN])
 			bonus += sc->data[SC_TWOHANDQUICKEN]->val3;
 		if(sc->data[SC_SPEARQUICKEN])
@@ -5738,7 +5748,10 @@ static short status_calc_aspd_rate(struct block_list *bl, struct status_change *
 		aspd_rate -= sc->data[SC_SKF_ASPD]->val1 * 10;
 	if (sc->data[SC_STARSTANCE] != NULL)
 		aspd_rate -= 10 * sc->data[SC_STARSTANCE]->val2;
-
+#ifdef RENEWAL //just in case people want to use classic aspd with renewal. Not going to add the other buffed skills because they are already very strong in classic.
+	if (sc->data[SC_INC_AGI])
+		aspd_rate -= sc->data[SC_INC_AGI]->val1 * 10;
+#endif
 	return (short)cap_value(aspd_rate,0,SHRT_MAX);
 }
 
@@ -5838,6 +5851,10 @@ static unsigned int status_calc_maxhp(struct block_list *bl, struct status_chang
 		maxhp -= maxhp * sc->data[SC_GM_BATTLE2]->val1 / 100;
 	if (sc->data[SC_LUNARSTANCE] != NULL)
 		maxhp += maxhp * sc->data[SC_LUNARSTANCE]->val2 / 100;
+#ifdef RENEWAL
+	if (sc->data[SC_ANGELUS])
+		maxhp += sc->data[SC_ANGELUS]->val2 * 10;
+#endif
 
 	return (unsigned int)cap_value(maxhp, 1, UINT_MAX);
 }
@@ -8498,7 +8515,11 @@ static int status_change_start_sub(struct block_list *src, struct block_list *bl
 				val2 = val1*10; //Actual boost (since 100% = 1000)
 				break;
 			case SC_SUFFRAGIUM:
+#ifdef RENEWAL
+				val2 = 5 + 5 * val1; //Speed cast decrease
+#else
 				val2 = 15 * val1; //Speed cast decrease
+#endif
 				break;
 			case SC_HEALPLUS:
 				if (val1 < 1)
@@ -10461,6 +10482,7 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 		}
 
 		break;
+#ifndef RENEWAL
 	case SC_ASSUMPTIO:
 		status_change_end(bl, SC_KYRIE, INVALID_TIMER);
 		status_change_end(bl, SC_KAITE, INVALID_TIMER);
@@ -10468,6 +10490,7 @@ static bool status_end_sc_before_start(struct block_list *bl, struct status_data
 	case SC_KAITE:
 		status_change_end(bl, SC_ASSUMPTIO, INVALID_TIMER);
 		break;
+#endif
 	case SC_CARTBOOST:
 		if (sc->data[SC_DEC_AGI] != NULL || sc->data[SC_ADORAMUS] != NULL) {
 			// Cancel Decrease Agi, but take no further effect [Skotlex]

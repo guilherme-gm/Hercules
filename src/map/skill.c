@@ -1227,6 +1227,10 @@ static int skill_calc_heal(struct block_list *src, struct block_list *target, ui
 			hp = hp * 150 / 100;
 		if (sc->data[SC_NO_RECOVER_STATE])
 			hp = 0;
+#ifdef RENEWAL
+		if(sc->data[SC_ASSUMPTIO])
+			hp += hp * (sc->data[SC_ASSUMPTIO]->val1 * 2) / 100;
+#endif
 	}
 
 #ifdef RENEWAL
@@ -7344,9 +7348,11 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 				break;
 			}
 		case PR_SLOWPOISON:
-		case PR_IMPOSITIO:
 		case PR_LEXAETERNA:
+#ifndef RENEWAL
+		case PR_IMPOSITIO:
 		case PR_SUFFRAGIUM:
+#endif
 		case PR_BENEDICTIO:
 		case LK_BERSERK:
 		case MS_BERSERK:
@@ -7913,6 +7919,10 @@ static int skill_castend_nodamage_id(struct block_list *src, struct block_list *
 			break;
 
 		case AL_ANGELUS:
+#ifdef RENEWAL
+		case PR_SUFFRAGIUM:
+		case PR_IMPOSITIO:
+#endif
 		case PR_MAGNIFICAT:
 		case PR_GLORIA:
 		case SN_WINDWALK:
@@ -14042,8 +14052,10 @@ static int skill_unit_onplace_timer(struct skill_unit *src, struct block_list *b
 			break;
 
 		case UNT_MAGNUS:
+#ifndef RENEWAL
 			if (!battle->check_undead(tstatus->race,tstatus->def_ele) && tstatus->race!=RC_DEMON)
 				break;
+#endif
 			skill->attack(BF_MAGIC,ss,&src->bl,bl,sg->skill_id,sg->skill_lv,tick,0);
 			break;
 
@@ -17328,7 +17340,9 @@ static int skill_vfcastfix(struct block_list *bl, double time, uint16 skill_id, 
 		// Variable cast reduction bonuses
 		if (sc->data[SC_SUFFRAGIUM]) {
 			VARCAST_REDUCTION(sc->data[SC_SUFFRAGIUM]->val2);
-			status_change_end(bl, SC_SUFFRAGIUM, INVALID_TIMER);
+	#ifndef RENEWAL
+			status_change_end(bl, SC_SUFFRAGIUM, INVALID_TIMER); //RENEWAL rebalance removed the condition of only 1 cast
+	#endif
 		}
 		if (sc->data[SC_MEMORIZE]) {
 			VARCAST_REDUCTION(50);

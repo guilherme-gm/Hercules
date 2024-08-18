@@ -1684,6 +1684,12 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 				case WZ_STORMGUST:
 					skillratio += 40 * skill_lv;
 					break;
+#ifdef RENEWAL
+				case PR_MAGNUS:
+					if (battle->check_undead(tst->race,tst->def_ele) || tst->race == RC_DEMON)
+					skillratio += 30;
+					break;
+#endif
 				case HW_NAPALMVULCAN:
 					skillratio += 10 * skill_lv - 30;
 					break;
