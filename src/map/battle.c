@@ -2485,8 +2485,8 @@ static int battle_calc_skillratio(int attack_type, struct block_list *src, struc
 					skillratio += ((skill_lv-1)%5+1) * 100;
 					break;
 				case RK_SONICWAVE:
-					skillratio = (skill_lv + 5) * 100;
-					skillratio = skillratio * (100 + (status->get_lv(src)-100) / 2) / 100;
+					skillratio += 950 + skill_lv * 150; //2022 update, got this from rathena and decided to update it
+					RE_LVL_DMOD(100);
 					break;
 				case RK_HUNDREDSPEAR:
 						skillratio += 500 + (80 * skill_lv);
