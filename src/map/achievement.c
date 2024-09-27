@@ -23,10 +23,12 @@
 
 #include "map/achievement.h"
 
+#include "map/intif.h"
 #include "map/itemdb.h"
 #include "map/mob.h"
 #include "map/party.h"
 #include "map/pc.h"
+#include "map/rodex.h"
 #include "map/script.h"
 
 #include "common/conf.h"
@@ -1038,7 +1040,6 @@ static void achievement_get_rewards_buffs(struct map_session_data *sd, const str
 		script->run(ad->rewards.bonus, 0, sd->bl.id, 0);
 }
 
-// TODO: kro send items by rodex
 static void achievement_get_rewards_items(struct map_session_data *sd, const struct achievement_data *ad)
 {
 	nullpo_retv(sd);
@@ -1047,18 +1048,58 @@ static void achievement_get_rewards_items(struct map_session_data *sd, const str
 	struct item it = { 0 };
 	it.identify = 1;
 
-	for (int i = 0; i < VECTOR_LENGTH(ad->rewards.item); i++) {
-		it.nameid = VECTOR_INDEX(ad->rewards.item, i).id;
-		int total = VECTOR_INDEX(ad->rewards.item, i).amount;
+	if (battle_config.feature_rodex_achievement_reward) {
+		struct rodex_message msg = { 0 };
 
-		//Check if it's stackable.
-		if (!itemdb->isstackable(it.nameid)) {
-			it.amount = 1;
-			for (int j = 0; j < total; ++j)
-				pc->additem(sd, &it, 1, LOG_TYPE_ACHIEVEMENT);
-		} else {
-			it.amount = total;
-			pc->additem(sd, &it, total, LOG_TYPE_ACHIEVEMENT);
+		rodex->mail_init(&msg, RODEX_NPC_SENDER, "GM");
+
+		safestrncpy(msg.title, "Achievement Reward Mail", sizeof(msg.title));
+		snprintf(msg.body, sizeof(msg.body), "[%s] Achievement Reward.", ad->name);
+
+
+		for (int i = 0; i < VECTOR_LENGTH(ad->rewards.item); i++) {
+			it.nameid = VECTOR_INDEX(ad->rewards.item, i).id;
+			int total = VECTOR_INDEX(ad->rewards.item, i).amount;
+
+			//Check if it's stackable.
+			if (!itemdb->isstackable(it.nameid)) {
+				it.amount = 1;
+
+				for (int j = 0; j < total; ++j) {
+					rodex->mail_try_add_item(&msg, &it);
+
+					if (msg.items_count == RODEX_MAX_ITEM) {
+						rodex->mail_send(&msg, sd->status.char_id, false);
+						rodex->mail_clear_attachments(&msg);
+					}
+				}
+			} else {
+				it.amount = total;
+				rodex->mail_try_add_item(&msg, &it);
+			}
+
+			if (msg.items_count == RODEX_MAX_ITEM) {
+				rodex->mail_send(&msg, sd->status.char_id, false);
+				rodex->mail_clear_attachments(&msg);
+			}
+		}
+
+		if (msg.items_count > 0)
+			rodex->mail_send(&msg, sd->status.char_id, false);
+	} else {
+		for (int i = 0; i < VECTOR_LENGTH(ad->rewards.item); i++) {
+			it.nameid = VECTOR_INDEX(ad->rewards.item, i).id;
+			int total = VECTOR_INDEX(ad->rewards.item, i).amount;
+
+			//Check if it's stackable.
+			if (!itemdb->isstackable(it.nameid)) {
+				it.amount = 1;
+				for (int j = 0; j < total; ++j)
+					pc->additem(sd, &it, 1, LOG_TYPE_ACHIEVEMENT);
+			} else {
+				it.amount = total;
+				pc->additem(sd, &it, total, LOG_TYPE_ACHIEVEMENT);
+			}
 		}
 	}
 }
@@ -1424,9 +1465,9 @@ static bool achievement_readdb_validate_criteria_itemtype(const struct config_se
 			} else if ((string = libconfig->setting_get_string_elem(tt, j))) {
 				if (!script->get_constant(string, &val)) {
 					ShowError("achievement_readdb_validate_criteria_itemtype: Invalid ItemType %s provided (Achievement: %d, Objective: %d). Skipping...\n", string, entry_id, obj_idx);
-					continue;			
+					continue;
 				}
-				
+
 				if (val == IT_MAX) {
 					obj->item_type |= (2 << val) - 1;
 				} else {
