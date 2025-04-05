@@ -6712,8 +6712,10 @@ static BUILDIN(mesclear)
 
 /// Ends the script and displays the button 'close' on the npc dialog.
 /// The dialog is closed when the button is pressed.
+/// When using "close3", it will also clear the current cutin after the close button is pressed.
 ///
 /// close;
+/// close3;
 static BUILDIN(close)
 {
 	struct map_session_data *sd = script->rid2sd(st);
@@ -6721,6 +6723,10 @@ static BUILDIN(close)
 		return true;
 
 	st->state = sd->state.dialog == 1 ? CLOSE : END;
+
+	if (strncmp(get_buildin_name(st), "close3", 6) == 0)
+		st->clear_cutin = true;
+
 	clif->scriptclose(sd, st->oid);
 	return true;
 }
@@ -29040,6 +29046,7 @@ static void script_parse_builtin(void)
 		BUILDIN_DEF(mesclear,""),
 		BUILDIN_DEF(close,""),
 		BUILDIN_DEF(close2,""),
+		BUILDIN_DEF2(close, "close3", ""),
 		BUILDIN_DEF(menu,"sl*"),
 		BUILDIN_DEF2(menu, "zmenu", "sl*"),
 		BUILDIN_DEF(select,"s*"), //for future jA script compatibility

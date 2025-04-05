@@ -760,6 +760,7 @@ struct script_state {
 	unsigned freeloop : 1;// used by buildin_freeloop
 	unsigned op2ref : 1;// used by op_2
 	unsigned npc_item_flag : 2;
+	unsigned clear_cutin: 1; //< Whether to clear cutin after closing (1) or not (0) (close3)
 	unsigned int id;
 };
 

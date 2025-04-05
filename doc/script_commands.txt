@@ -1509,6 +1509,37 @@ Don't expect things to run smoothly if you don't make your scripts 'end'.
 
 ---------------------------------------
 
+*close3()
+
+This command will create a 'close' button in the message window for the invoking character.
+
+WARNING:
+If no window is currently on screen, the script execution will halt indefinitely! See 'close'.
+
+The difference between close3() and close() is that, when using close3(),
+Hercules will also remove the current cutin after the message box is closed.
+This is useful when you have NPCs using cutin, as you can simply close3() it and
+Hercules will take care of removing the cutin for you.
+
+Example:
+
+	cutin("kafra_07", 2); // Displays NPC illustration
+	mes("See you.");
+	close3(); // Shows the close button, once clicked, illustration is removed
+
+
+This would be logically equivalent to:
+
+	cutin("kafra_07", 2);
+	mes("See you.");
+	close2(); // Shows close button, but continues script execution
+	cutin("", 255); // Removes illustration
+	end; // Ends script
+
+But in a compact form.
+
+---------------------------------------
+
 *end
 
 This instruction will stop the execution for this particular script.

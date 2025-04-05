@@ -1477,8 +1477,12 @@ static int npc_scriptcont(struct map_session_data *sd, int id, bool closing)
 		return 1;
 	}
 
-	if (closing && sd->st->state == CLOSE)
-		sd->st->state = END;
+	if (closing) {
+		if (sd->st->clear_cutin)
+			clif->cutin(sd, "", 255);
+		if (sd->st->state == CLOSE)
+			sd->st->state = END;
+	}
 
 	script->run_main(sd->st);
 
