@@ -100,7 +100,7 @@ morocc, 285, 70, 4	script	Wood Supply Team Chief	2_M_OLDBLSMITH,{
 				mesf("You brought %d pieces of wood. Now you only need to bring %d more. Keep up with the good job.", .@count, (10 - re_wood));
 				close();
 			}
-			
+
 			mes("[Wood Supply Team Chief]");
 			mes("Good job. Here is your reward.");
 			mes("Take this to the ^7D9BE3Morroc Restauration Comitee^000000, and you will be able to exchange it for something you want.");
@@ -123,7 +123,7 @@ morocc, 285, 70, 4	script	Wood Supply Team Chief	2_M_OLDBLSMITH,{
 		}
 		end;
 	}
-	
+
 	if (questprogress(5252, PLAYTIME) == 2) {
 		erasequest(5252);
 		mes("[Wood Supply Team Chief]");
@@ -144,7 +144,7 @@ morocc, 285, 70, 4	script	Wood Supply Team Chief	2_M_OLDBLSMITH,{
 		mes("[Wood Supply Team Chief]");
 		mes("We have already finished the repairs for most of the city buildings, except for the symbol of our city, the ^7D9BE3Morroc Castle^000000.");
 		close();
-	
+
 	case 2:
 		if (BaseLevel < 80) {
 			mes("[Wood Supply Team Chief]");
@@ -239,7 +239,7 @@ OnTouch:
 		mes("You hit the tree vigorously using you hatchet.");
 		close();
 	}
-	
+
 	mes("You've got 1 Wood for construction.");
 	getitem(Wood_, 1);
 	close();
@@ -287,7 +287,7 @@ morocc, 282, 284, 4	script	Rope Team Chief#ep14	1_M_ORIENT01,{
 			.@item1 = 0;
 			.@item2 = 0;
 			setarray(.@materialList, Pointed_Scale, Spiderweb, Tendon, Thin_Stem, Tough_Scalelike_Stem);
-			
+
 			.@menu$ = "";
 			for (.@i = 0; .@i < getarraysize(.@materialList); ++.@i) {
 				.@menu$ = sprintf("%s10 %s (%d):", .@menu$, getitemname(.@materialList[.@i]), countitem(.@materialList[.@i]));
@@ -302,7 +302,7 @@ morocc, 282, 284, 4	script	Rope Team Chief#ep14	1_M_ORIENT01,{
 					next();
 					continue;
 				}
-				
+
 				if (.@item1 == 0) {
 					.@item1 = .@itemId;
 					mes("[Rope Team Chief]");
@@ -310,7 +310,7 @@ morocc, 282, 284, 4	script	Rope Team Chief#ep14	1_M_ORIENT01,{
 					next();
 					continue;
 				}
-				
+
 				if (.@item1 == .@itemId) {
 					mes("[Rope Team Chief]");
 					mes("You have already said you have this one. What is the other material?");
@@ -336,7 +336,7 @@ morocc, 282, 284, 4	script	Rope Team Chief#ep14	1_M_ORIENT01,{
 			mes("Please, receive this small token of our gratitude.");
 			mes("Take this to the ^7D9BE3Morroc Restauration Comitee^000000, and you will be able to exchange it for something you want.");
 			close();
-		
+
 		case 2:
 			mes("[Rope Team Chief]");
 			mes("You didn't read the memo I gave you?");
@@ -352,7 +352,7 @@ morocc, 282, 284, 4	script	Rope Team Chief#ep14	1_M_ORIENT01,{
 			mes("[Rope Team Chief]");
 			mes("Please, remember, 10 units of two different, not 20 of the same.");
 			close();
-		
+
 		case 3:
 			mes("[Rope Team Chief]");
 			mes("Have a good day.");
@@ -618,10 +618,10 @@ morocc, 40, 72, 6	script	Annoyed Mimic#ep14_3	4_MIMIC,{
 		.@makeQuestId = 5251;
 		.@questId = 5253;
 		.@cooldownQuestId = 5254;
-		
+
 		.@globalVar$ = "$mocre_wood";
 		.@charVar$ = "re_wood";
-		
+
 		.@materialName$ = _("wood");
 		.@unitName$ = _("pieces of wood");
 		.@pileName$ = _("woodpile");
@@ -629,10 +629,10 @@ morocc, 40, 72, 6	script	Annoyed Mimic#ep14_3	4_MIMIC,{
 		.@makeQuestId = 5255;
 		.@questId = 5257;
 		.@cooldownQuestId = 5258;
-		
+
 		.@globalVar$ = "$mocre_rope";
 		.@charVar$ = "re_rope";
-		
+
 		.@materialName$ = _("rope");
 		.@unitName$ = _("pieces of rope");
 		.@pileName$ = _("rope pile");
@@ -640,10 +640,10 @@ morocc, 40, 72, 6	script	Annoyed Mimic#ep14_3	4_MIMIC,{
 		.@makeQuestId = 5259;
 		.@questId = 5261;
 		.@cooldownQuestId = 5262;
-		
+
 		.@globalVar$ = "$mocre_brick";
 		.@charVar$ = "re_brick";
-		
+
 		.@materialName$ = _("brick");
 		.@unitName$ = _("bricks");
 		.@pileName$ = _("brick pile");
@@ -673,7 +673,7 @@ morocc, 40, 72, 6	script	Annoyed Mimic#ep14_3	4_MIMIC,{
 				"before you can accept the delivery job.", .@materialName$);
 			close();
 		}
-		
+
 		if (questprogress(.@questId) == 1) {
 			mes(.@npc$);
 			mes("You are already working on this.");
@@ -790,7 +790,7 @@ OnTouch:
 
 	if (questprogress(.@questId) == 0 || countitem(.@item) == 0)
 		end;
-	
+
 	mes("- You may deliver the materials here. -");
 	next();
 	if (select(sprintf("Deliver %s.", .@materialName$), "Cancel.") == 2) {
@@ -867,7 +867,7 @@ OnTouch:
 			"and talk to the Reward Coordinator.");
 		if (questprogress(.@questId) == 0)
 			close();
-		
+
 		next();
 		if (getd(.@charVar$) < 100) {
 			mes(.@npc$);
@@ -902,7 +902,7 @@ OnTouch:
 			"that %s right there?", .@pileName$);
 		mes("You may leave it beside it.");
 		close();
-	
+
 	case 3:
 		mes(.@npc$);
 		mes("Haha,\r"
@@ -1022,7 +1022,7 @@ morocc, 42, 65, 5	duplicate(MocReBrickPile)	Brick Pile#10	4_BRICKPILE
 	function showPiles {
 		.@count = getarg(0) / 100;
 		.@npc$ = sprintf("%s%%d", getarg(1));
-		
+
 		for (.@i = 1; .@i <= .@count; ++.@i)
 			hideoffnpc(sprintf(.@npc$, .@i));
 
@@ -1041,7 +1041,7 @@ morocc, 42, 65, 5	duplicate(MocReBrickPile)	Brick Pile#10	4_BRICKPILE
 			.@count = ($mocre_wood / 100);
 		else if (getarg(0) > 0)
 			.@count = 1;
-		
+
 		.@npc$ = sprintf("%s%%d", getarg(1));
 		for (.@i = 10; .@i > .@count; --.@i)
 			hideonnpc(sprintf(.@npc$, .@i));
@@ -1062,7 +1062,7 @@ morocc, 42, 65, 5	duplicate(MocReBrickPile)	Brick Pile#10	4_BRICKPILE
 			close2();
 			return;
 		}
-	
+
 		mes("- A material used in the restauration of the castle and other buildings in Morroc. -");
 		next();
 		mes("- How many units you want to pick? -");
@@ -1074,13 +1074,13 @@ morocc, 42, 65, 5	duplicate(MocReBrickPile)	Brick Pile#10	4_BRICKPILE
 				close2();
 				return;
 			}
-			
+
 			if (.@num < 0 || .@num > 10) {
 				mes("- You should only pick as many as you can carry. -");
 				close2();
 				return;
 			}
-	
+
 			if (!checkweight(getarg(0), .@num)) {
 				mes("^ff0000This is over your carry capacity.^000000");
 				next();
@@ -1310,7 +1310,7 @@ morocc, 54, 190, 5	script	Reward Coordinator	4_M_SAGE_C,{
 			mes("For more information, it is better that you check the machine itself.");
 			next();
 			break;
-		
+
 		case 4:
 			mes("[Reward Coordinator]");
 			mes("Hmm, right...");
@@ -1410,7 +1410,7 @@ morocc, 40, 190, 6	script	Snack Lady#ep14_3	4_F_CAVE1,{
 			close();
 		}
 	} else if (questprogress(5263) == 1) {
-		setarray(.@snackList[0], 
+		setarray(.@snackList[0],
 			Str_Dish03, Str_Dish04, Str_Dish05, Str_Dish06,
 			Agi_Dish03, Agi_Dish04, Agi_Dish05, Agi_Dish06,
 			Vit_Dish03, Vit_Dish04, Vit_Dish05, Vit_Dish06,
@@ -1471,7 +1471,7 @@ morocc, 40, 190, 6	script	Snack Lady#ep14_3	4_F_CAVE1,{
 			mes("[Snack Lady]");
 			mes("You can always check the list using Alt + U. Thank you.");
 			close();
-		
+
 		case 3:
 			mes("[Snack Lady]");
 			mes("Aah, I am so busy, I am losing my mind!");
@@ -1851,7 +1851,7 @@ S_RandomIndex:
 		case 3: .@siteName$ = _("wood supply team"); break;
 		case 4: .@siteName$ = _("central castle construction site"); break;
 		}
-		
+
 		mes("[HR Supervisor]");
 		mesf("You have delivered\r"
 			"1 worker\r"
@@ -1976,79 +1976,78 @@ morocc, 275, 68, 5	duplicate(HRSupervisor)	HR Supervisor#wood	4_M_SEAMAN,4,4
 morocc, 47, 193, 6	script	HR Centurion#ep14_3	4_M_MOCASS1,{
 	if (questprogress(5265) == 0) {
 		mes("[Centurion Van]");
-		mes("I am Van, and I am in charge of purging the monsters around Morroc. What brings you here?");
+		mes("I'm Van, and I'm in charge of purging monsters around Morroc. What brings you here?");
 		next();
-		switch (select("Centurion?", "Dou you have a job for me?")) {
+		switch (select("Centurion?", "Do you have a job for me?")) {
 		case 1:
 			mes("[Centurion Van]");
-			mes("Yes, because I lead 100 soldiers.");
+			mes("Yes, because I command 100 soldiers.");
 			next();
 			mes("[Centurion Van]");
-			mes("The Centurion rank is the highest rank a mercenary soldier may reach.");
+			mes("Centurion is the highest rank that mercenary soldiers can rise to.");
 			close();
 
 		case 2:
 			if (BaseLevel < 120) {
 				mes("[Centurion Van]");
-				mes("Hmm, I am sorry, but you don't look strong enough to deal with the monsters in there. You must be at least on Level 120.");
+				mes("Um, I'm sorry, but you don't look strong enough to fight the monsters around this area. You have to be at least Level 120.");
 				close();
 			}
 
 			if (questprogress(5269, PLAYTIME) == 1) {
 				mes("[Centurion Van]");
-				mes("I understand your eagerness to continue fighting to make Morroc a better place.");
-				next();
-				mes("[Centurion Van]");
-				mes("But you should also take care of yourself and use your rest time to its fullness.");
-				mes("Please, come back later.");
+				mes("I'm still in the process of organizing the next subjugation party. Just wait; I won't forget to take you with me.");
 				close();
 			}
 
 			if (questprogress(5269, PLAYTIME) == 2) {
+				mes("[Centurion Van]");
+				mes("It's about time to send another guerrilla subjugation party.");
 				erasequest(5269);
-			} else {
-				mes("[Centurion Van]");
-				mes("Ah, yes, I do.");
-				mes("After Satan Morroc came back, it brought together lots of its underlyings.");
-				next();
-				mes("[Centurion Van]");
-				mes("Those are dangerous creatures that are near the city.");
-				mes("I am here with the task of purging those dangerous monsters to make Morroc area safe again.");
-				next();
 			}
+
 			mes("[Centurion Van]");
-			mes("Please, can you help us by defeating 10 of each of kind of those underlyings?");
-			mes("There are 4 kinds in total.");
+			mes("I'm recruiting members for a guerrilla subjugation party to subjugate Morroc Reincarnations on the fields.");
 			next();
-			if (select("Accept", "Refuse") == 2) {
+			mes("[Centurion Van]");
+			mes("Are you interested?");
+			next();
+			if (select("Apply for the subjugation party.", "Do not apply.") == 2) {
 				mes("[Centurion Van]");
-				mes("Oh, okay.");
-				mes("Well, this is the only job I really have right now.");
+				mes("Coward.");
 				close();
 			}
 
 			mes("[Centurion Van]");
-			mes("Thank you!");
-			mes("You may find those creatures at the fields Notheast of Morroc.");
+			mes("Good. Let me introduce myself again. I'm Van, subjugation party centurion.");
 			next();
 			mes("[Centurion Van]");
-			mes("After you defeat 10 of each, you may report directly to the Rewards Coordinator right there.");
+			mes("The members of my subjugation party don't work in groups. Each of them works on individual tasks.");
+			next();
+			mes("[Centurion Van]");
+			mes("Here's your mission: subjugate Morroc Reincarnations around the city. I'm told that there are 4 different types of Reincarnations, so I want you to hunt 10 of each type.");
 			setquest(5265);
 			setquest(5266);
 			setquest(5267);
 			setquest(5268);
+			next();
+			mes("[Centurion Van]");
+			mes("When you're done, report directly to the Reward Coordinator at the headquarters.  Dismissed!");
 			close();
 		}
 	} else {
 		mes("[Centurion Van]");
-		mes("Please, defeat 10 of each kind of Satan Morroc's underlyings.");
-		mes("Once you are done, you may report directly to the Rewards Coordinator right there.");
+		mes("Did you accomplish the subjugation task?");
+		next();
+		select("I'm here to report.");
+		mes("[Centurion Van]");
+		mes("You can report directly to the Reward Coordinator at the headquarters.");
 		next();
 		mes("[Centurion Van]");
-		mes("You may find those creatures at the fields Notheast of Morroc.");
-		mes("Good luck!");
+		mes("Keep up the good work.");
 		close();
 	}
+	end;
 }
 
 // == Other NPCs ======================
